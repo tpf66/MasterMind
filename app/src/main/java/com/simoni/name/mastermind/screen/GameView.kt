@@ -5,7 +5,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalConfiguration
-import com.simoni.name.mastermind.model.IstantGame
 import com.simoni.name.mastermind.model.MyState
 import com.simoni.name.mastermind.model.MyViewModel
 
@@ -15,7 +14,7 @@ fun GameView(vm: MyViewModel) {
 
     when (configuration.orientation) {
         Configuration.ORIENTATION_PORTRAIT -> {
-            TODO()
+            //TODO
             Button(onClick = { vm.init() }) {
                 Text(text = "init")
             }

@@ -6,16 +6,14 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import com.simoni.name.mastermind.model.IstantGame
+import androidx.compose.ui.platform.LocalContext
+import com.simoni.name.mastermind.db.*
+import com.simoni.name.mastermind.model.InstantGame
+import com.simoni.name.mastermind.model.MyState
+import com.simoni.name.mastermind.model.MyViewModel
 import com.simoni.name.mastermind.screen.*
 import com.simoni.name.mastermind.ui.theme.MasterMindTheme
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import com.simoni.name.mastermind.model.MyState.*
-import com.simoni.name.mastermind.model.MyViewModel
 
 
 class MainActivity : ComponentActivity() {
@@ -23,20 +21,20 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MasterMindTheme {
-                //val context = LocalContext.current
-                //val db =  DbGame.getInstance(context)
-                //val repository = Repository(db.gameDao())
-                //var instantGame by rememberSaveable { mutableStateOf(IstantGame(this)) }
-                val vm : MyViewModel = MyViewModel()
+                val context = LocalContext.current
+                val db =  DbGame.getInstance(context)
+                val repository = Repository(db.gameDao())
+                var instantGame = InstantGame()
+                val vm : MyViewModel = MyViewModel(instantGame, repository)
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
                     when (vm.state.value) {
-                        Init -> Home(vm)
-                        NewGame -> GameView(vm)
-                        History -> History(vm)
+                        MyState.Init -> Home(vm)
+                        MyState.NewGame -> GameView(vm)
+                        MyState.History -> History(vm)
                     }
                 }
             }

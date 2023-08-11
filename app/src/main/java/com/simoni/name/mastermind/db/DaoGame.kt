@@ -15,6 +15,6 @@ interface DaoGame {
     @Delete
     fun delete(game: Game)
 
-    @Query(""" SELECT ALL * FROM Game """)
+    @Query(""" SELECT * FROM game ORDER BY date DESC """)
     fun selectAll(): Game?
 }

@@ -14,7 +14,7 @@ fun History(vm: MyViewModel) {
 
     when (configuration.orientation) {
         Configuration.ORIENTATION_PORTRAIT -> {
-            TODO()
+            //TODO
             Button(onClick = { vm.new() }) {
                 Text(text = "new")
             }
