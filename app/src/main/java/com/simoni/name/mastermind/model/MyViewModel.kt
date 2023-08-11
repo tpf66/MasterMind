@@ -3,7 +3,7 @@ package com.simoni.name.mastermind.model
 import com.simoni.name.mastermind.model.MyState.*
 import androidx.compose.runtime.mutableStateOf
 
-class MyViewModel(instantGame: IstantGame) {
+class MyViewModel() {
     var state = mutableStateOf(Init)
     var n = 0
 

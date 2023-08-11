@@ -26,8 +26,8 @@ class MainActivity : ComponentActivity() {
                 //val context = LocalContext.current
                 //val db =  DbGame.getInstance(context)
                 //val repository = Repository(db.gameDao())
-                var instantGame by rememberSaveable { mutableStateOf(IstantGame(this)) }
-                val vm : MyViewModel = MyViewModel(instantGame)
+                //var instantGame by rememberSaveable { mutableStateOf(IstantGame(this)) }
+                val vm : MyViewModel = MyViewModel()
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),
