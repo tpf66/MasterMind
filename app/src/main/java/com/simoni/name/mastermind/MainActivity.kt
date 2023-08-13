@@ -13,6 +13,7 @@ import com.simoni.name.mastermind.model.InstantGame
 import com.simoni.name.mastermind.model.MyState
 import com.simoni.name.mastermind.model.MyViewModel
 import com.simoni.name.mastermind.screen.*
+import com.simoni.name.mastermind.ui.theme.Background
 import com.simoni.name.mastermind.ui.theme.MasterMindTheme
 
 
@@ -29,7 +30,7 @@ class MainActivity : ComponentActivity() {
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = Background
                 ) {
                     when (vm.state.value) {
                         MyState.Init -> Home(vm)

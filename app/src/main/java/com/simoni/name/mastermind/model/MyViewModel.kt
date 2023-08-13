@@ -9,6 +9,19 @@ class MyViewModel(instantGame: InstantGame, repository: Repository) {
     var state = mutableStateOf(Init)
     var n = 0
 
+    fun playHome() {
+        state.value = Init
+        instanGame.newMatch()
+
+    }
+
+    fun historyHome() {
+
+    }
+
+
+
+
     //Funzioni di prova
     fun init(){
         state.value = Init
