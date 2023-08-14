@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -34,7 +33,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     when (vm.state.value) {
                         MyState.Init -> Home(vm)
-                        MyState.NewGame -> GameView(vm)
+                        MyState.Match -> GameView(vm)
                         MyState.History -> History(vm)
                     }
                 }
