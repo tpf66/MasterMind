@@ -1,5 +1,6 @@
 package com.simoni.name.mastermind
 
+import android.app.Application
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -7,9 +8,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.simoni.name.mastermind.db.*
+import androidx.lifecycle.ViewModelProvider
+import com.simoni.name.mastermind.db.DBMastermind
+import com.simoni.name.mastermind.db.Repository
 import com.simoni.name.mastermind.model.InstantGame
-import com.simoni.name.mastermind.model.MyState
+import com.simoni.name.mastermind.model.utils.MyViewState
 import com.simoni.name.mastermind.model.MyViewModel
 import com.simoni.name.mastermind.screen.*
 import com.simoni.name.mastermind.ui.theme.Background
@@ -22,19 +25,20 @@ class MainActivity : ComponentActivity() {
         setContent {
             MasterMindTheme {
                 val context = LocalContext.current
-                val db =  DbGame.getInstance(context)
-                val repository = Repository(db.gameDao())
-                var instantGame = InstantGame()
-                val vm : MyViewModel = MyViewModel(instantGame, repository)
+                val db =  DBMastermind.getInstance(context)
+                val repository = Repository(db.daoGameHistory())
+                val instantGame = InstantGame(repository)
+                //val vm : MyViewModel = ViewModelProvider(this)[MyViewModel(instantGame,repository,Application())::class.java]
+                val vm = MyViewModel(instantGame,repository)
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = Background
                 ) {
                     when (vm.state.value) {
-                        MyState.Init -> Home(vm)
-                        MyState.Match -> GameView(vm)
-                        MyState.History -> History(vm)
+                        MyViewState.Init -> Home(vm)
+                        MyViewState.Match -> GameView(vm)
+                        MyViewState.History -> History(vm)
                     }
                 }
             }
