@@ -8,8 +8,6 @@ import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -28,8 +26,10 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.simoni.name.mastermind.model.MyViewModel
 import com.simoni.name.mastermind.model.utils.MyViewState
 import com.simoni.name.mastermind.ui.theme.*
@@ -37,7 +37,7 @@ import com.simoni.name.mastermind.ui.theme.*
 
 
 @Composable
-fun Home(vm: MyViewModel) {
+fun Home(vm: MyViewModel, navController: NavHostController) {
     val configuration = LocalConfiguration.current
 
     when (configuration.orientation) {
@@ -49,11 +49,13 @@ fun Home(vm: MyViewModel) {
                 Text(
                     text = "Mastermind",
                     modifier = Modifier.padding(bottom = 16.dp),
-                    fontSize = 30.sp,
+                    fontSize = 40.sp,
+                    color = W,
+                    fontWeight = FontWeight.Bold
                 )
-                HomeButton(text = "New Game", onClick = { vm.state.value = MyViewState.Match })
+                HomeButton(text = "New Game", onClick = { navController.navigate("GameView") })
                 Spacer(modifier = Modifier.height(16.dp))
-                HomeButton(text = "Game History", onClick = { vm.state.value = MyViewState.History })
+                HomeButton(text = "Game History", onClick = { navController.navigate("History") })
             }
         }
 

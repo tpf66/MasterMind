@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.simoni.name.mastermind.db.Game
 import com.simoni.name.mastermind.model.MyViewModel
 import kotlinx.coroutines.Dispatchers
@@ -40,7 +41,7 @@ import java.util.Calendar
 import java.util.Locale
 
 @Composable
-fun History(vm: MyViewModel) {
+fun History(vm: MyViewModel, navController: NavHostController) {
     val configuration = LocalConfiguration.current
 
     when (configuration.orientation) {

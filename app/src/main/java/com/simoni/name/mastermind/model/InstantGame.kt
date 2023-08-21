@@ -1,6 +1,7 @@
 package com.simoni.name.mastermind.model
 
 
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import com.simoni.name.mastermind.db.Game
 import com.simoni.name.mastermind.db.Repository
@@ -18,7 +19,7 @@ import java.util.Locale
 
 class InstantGame(private val repository: Repository) {
     var secret = mutableStateOf("")
-    var attempts = mutableListOf<Attempt>()
+    var attempts = mutableStateListOf<Attempt>()
     var startTime = System.currentTimeMillis()
     var duration =  mutableStateOf(0L)
     var date = mutableStateOf("")
@@ -30,9 +31,9 @@ class InstantGame(private val repository: Repository) {
 
 
     init {
-        /* crasha...
+        /*
         CoroutineScope(Dispatchers.IO).launch {
-            currentId.value = repository.getNextId()?:-1
+            currentId.value = repository.getNextId() ?: 1L
         }*/
 
         newMatch()
@@ -52,7 +53,7 @@ class InstantGame(private val repository: Repository) {
     }
     private fun generateRandomSecret(): String {
         return buildString {
-            repeat(8) {
+            repeat(5) {
                 append(colorOptions.random())
             }
         }
@@ -77,9 +78,11 @@ class InstantGame(private val repository: Repository) {
         val evaluatedChars = mutableListOf<Char>()
 
         // Numero di cifre giuste al posto giusto
-        for (i in 0 until secret.value.length)
-            if (secret.value[i] == guess[i])
+        for (i in 0 until secret.value.length) {
+            if (secret.value[i] == guess[i]) {
                 nrr++
+            }
+        }
 
         // Numero di cifre giuste al posto sbagliato
         for (i in 0 until secret.value.length) {

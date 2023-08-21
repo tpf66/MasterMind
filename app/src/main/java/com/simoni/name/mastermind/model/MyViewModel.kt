@@ -1,18 +1,14 @@
 package com.simoni.name.mastermind.model
 
-import android.app.Application
-import com.simoni.name.mastermind.model.utils.MyViewState.*
-import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.AndroidViewModel
 import com.simoni.name.mastermind.db.Game
 import com.simoni.name.mastermind.db.Repository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class MyViewModel(inGame: InstantGame,repo : Repository) {
-    private val instantGame : InstantGame
-    private val repository : Repository
-    var state = mutableStateOf(Init)
+class MyViewModel(inGame: InstantGame, repo: Repository) {
+    val instantGame : InstantGame
+    val repository : Repository
+    //var state = mutableStateOf(Init)
     var n = 0
 
     init {
