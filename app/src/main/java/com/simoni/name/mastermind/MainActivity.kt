@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
                 val db =  DBMastermind.getInstance(context)
                 val repository = Repository(db.daoGameHistory())
                 val instantGame by remember { mutableStateOf(InstantGame(repository)) }
-                val vm = MyViewModel(instantGame, repository)
+                val vm by remember { mutableStateOf(MyViewModel(instantGame, repository)) }
                 val navController = rememberNavController()
 
                 val game = Game(

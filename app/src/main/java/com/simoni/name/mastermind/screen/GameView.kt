@@ -1,6 +1,5 @@
 package com.simoni.name.mastermind.screen
 
-import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -44,21 +42,17 @@ import com.simoni.name.mastermind.model.MyViewModel
 import com.simoni.name.mastermind.model.utils.Attempt
 import com.simoni.name.mastermind.ui.theme.*
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.shape.CutCornerShape
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import com.simoni.name.mastermind.model.utils.GameState
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import kotlin.math.absoluteValue
 
 
 @Composable
@@ -80,7 +74,8 @@ fun GameView(vm: MyViewModel, navController: NavHostController) {
                     horizontalArrangement = Arrangement.Start
                 ) {
                     Button(
-                        onClick = { navController.navigate("Home") },
+                        onClick = {
+                            navController.navigate("Home") },
                         colors = ButtonDefaults.buttonColors(Blue3),
                         shape = RoundedCornerShape(15.dp)
                     ) {
@@ -181,39 +176,120 @@ fun GameArea(
             .verticalScroll(rememberScrollState())
     ) {
         for (rowIndex in 0 until 10) {
-            val myModifier : Modifier = if (rowIndex == attempts.size) {
+            val myModifier: Modifier = if (rowIndex == attempts.size) {
                 Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp)
-                    .border(BorderStroke(3.dp, W), shape = CutCornerShape(15.dp))
-            }else {
+                    .fillMaxWidth(0.8f)
+                    .padding(2.dp)
+                    .border(BorderStroke(2.dp, Blue4), shape = RoundedCornerShape(15.dp))
+            } else
                 Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp)
-            }
+                    .fillMaxWidth(0.8f)
+                    .padding(2.dp)
 
             Row(
-                modifier = myModifier,
-                horizontalArrangement = Arrangement.SpaceEvenly
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                if (rowIndex < attempts.size) {
-                    for (i in 0 until 5) {
-                        EmptyCircle(attempts[rowIndex].guess.get(i).toString()) {}
+                Row(
+                    modifier = myModifier,
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (rowIndex < attempts.size) {
+                        for (i in 0 until 5) {
+                            EmptyCircle(attempts[rowIndex].guess.get(i).toString()) {}
+                        }
+                    } else if (rowIndex == attempts.size) {
+                        for (i in 0 until 5)
+                            EmptyCircle(selectedColors[i], onClick = { onClick(i) })
+                    } else {
+                        for (i in 0 until 5)
+                            EmptyCircle(selectedColor = "X") {}
                     }
-                } else if (rowIndex == attempts.size) {
-                    for (i in 0 until 5)
-                        EmptyCircle(selectedColors[i], onClick = { onClick(i) })
-                } else {
-                    for (i in 0 until 5)
-                        EmptyCircle(selectedColor = "X") {}
+                }
+
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(0.5f),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (rowIndex < attempts.size)
+                        FeedBack(
+                            attempts[rowIndex].rightNumRightPos,
+                            attempts[rowIndex].rightNumWrongPos
+                        )
+                    else
+                        FeedBack(0, 0)
                 }
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }
 
+@Composable
+fun FeedBack(nrr: Int, nrw: Int) {
+        Canvas(modifier = Modifier
+            .size(50.dp)
+        ) {
+            val radius = 5.dp.toPx()
+            val circle = mutableStateListOf<Color>(W,W,W,W,W)
+
+            for (i in 0 until nrr)
+                circle[i] = Blue5
+            for (i in nrr until nrr+nrw)
+                circle[i] = Blue3
+            for (i in nrr+nrw until 5)
+                circle[i] = Color.Transparent
+
+
+            translate(left = -30f, top = -15f) {
+                drawCircle(
+                    color = circle[0],
+                    radius = radius,
+                )
+            }
+            translate(left = 0f, top = -15f) {
+                drawCircle(
+                    color = circle[1],
+                    radius = radius,
+                )
+            }
+            translate(left = 30f, top = -15f) {
+                drawCircle(
+                    color = circle[2],
+                    radius = radius,
+                )
+            }
+            translate(left = -15f, top = 15f) {
+                drawCircle(
+                    color = circle[3],
+                    radius = radius
+                )
+            }
+            translate(left = 15f, top = 15f) {
+                drawCircle(
+                    color = circle[4],
+                    radius = radius
+                )
+            }
+        }
+
+}
+
+/*@Preview(showBackground = true)
+@Composable
+fun GreetingPreviewFeedback() {
+    MasterMindTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = Background
+        ) {
+            FeedBack(nrr = 1, nrw = 4)
+        }
+    }
+}*/
 
 @Composable
 fun EmptyCircle(
@@ -234,7 +310,8 @@ fun EmptyCircle(
 
     Canvas(
         modifier = Modifier
-            .size(30.dp)
+            .size(40.dp)
+            .padding(5.dp)
             .clickable { onClick() }
             .border(3.dp, Color.Black, shape = CircleShape)
     ) {
@@ -255,7 +332,7 @@ fun ColorSelection(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 16.dp),
+            .padding(bottom = 15.dp),
         horizontalArrangement = Arrangement.Center
     ) {
         for (color in vm.instantGame.colorOptions) {
