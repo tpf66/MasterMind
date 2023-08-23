@@ -21,7 +21,7 @@ val G= Color(0xFFA9C91E)
 val Y= Color(0xFFF2C744)
 val P= Color(0xFFADA0B7)
 val O= Color(0xFFF2A20C)
-val B= Color(0xFF593B16)
+val B= Color(0xFF593B26)
 
 val Blue1 = Color(0xFF004D4D)
 val Blue2 = Color(0xFF006767)

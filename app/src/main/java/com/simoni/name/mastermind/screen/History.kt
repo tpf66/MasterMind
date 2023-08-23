@@ -6,34 +6,57 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.simoni.name.mastermind.db.DBMastermind
 import com.simoni.name.mastermind.db.Game
+import com.simoni.name.mastermind.db.Repository
+import com.simoni.name.mastermind.model.InstantGame
 import com.simoni.name.mastermind.model.MyViewModel
+import com.simoni.name.mastermind.ui.theme.Background
+import com.simoni.name.mastermind.ui.theme.Blue3
+import com.simoni.name.mastermind.ui.theme.MasterMindTheme
+import com.simoni.name.mastermind.ui.theme.W
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
@@ -46,68 +69,73 @@ fun History(vm: MyViewModel, navController: NavHostController) {
 
     when (configuration.orientation) {
         Configuration.ORIENTATION_PORTRAIT -> {
-
             var gameHistoryList by remember { mutableStateOf<List<Game>>(emptyList()) }
-            var selectedCount by remember { mutableStateOf(0) }
+            val stateLazy = rememberLazyListState()
 
             LaunchedEffect(Unit) {
-                val history = withContext(Dispatchers.IO) {
+                gameHistoryList = withContext(Dispatchers.IO) {
                     vm.getAllGameHistory()
                 }
-                gameHistoryList = history.map { it.copy(isSelected = false) }
             }
-            Box(
+
+            Column(
                 modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.BottomCenter
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                LazyColumn {
-                    items(gameHistoryList) { gameHistory ->
-                        GameHistoryItemRow(
-                            gameHistory = gameHistory,
-                            gameViewModel = vm,
-                            onSelectedChanged = { isSelected ->
-                                if (isSelected) {
-                                    selectedCount++
-                                } else {
-                                    selectedCount--
-                                }
-                            }
+                Row (
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
+                ){
+                    Button(
+                        onClick = { navController.navigate("Home") },
+                        colors = ButtonDefaults.buttonColors(Blue3),
+                        shape = RoundedCornerShape(15.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Home,
+                            contentDescription = null,
+                            tint = W
                         )
                     }
                 }
 
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(16.dp)
-                ) {
-                    Text(
-                        text = "Selected: $selectedCount",
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(bottom = 8.dp)  // non cancellare!!
-                    )
-
-                    Button(
-                        onClick = {
-                            val selectedGames = gameHistoryList.filter { it.isSelected }
-                            if (selectedGames.isNotEmpty()) {
-                                runBlocking {
-                                    vm.deleteSelectedGames(selectedGames)
-                                }
-                                gameHistoryList = gameHistoryList.filterNot { it.isSelected }
-                                selectedCount = 0
-                            }
-                        }
+                if (gameHistoryList.isEmpty()){
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ){
+                        Text(
+                            text = "Empty history",
+                            color = W,
+                            fontSize = 30.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }else {
+                    LazyColumn(
+                        modifier = Modifier,
+                        userScrollEnabled = true,
+                        state = stateLazy
                     ) {
-                        Text(text = "Delete Selected")
+                        itemsIndexed(gameHistoryList) { index, it ->
+
+                            GameHistoryItemRow(gameHistory = it)
+                            { gameToDelete ->
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    vm.deleteSelectedGames(gameToDelete)
+                                    gameHistoryList = vm.getAllGameHistory()
+                                }
+                            }
+
+                        }
                     }
                 }
             }
         }
 
         else -> {
-
         }
     }
 }
@@ -116,8 +144,7 @@ fun History(vm: MyViewModel, navController: NavHostController) {
 @Composable
 fun GameHistoryItemRow(
     gameHistory: Game,
-    gameViewModel: MyViewModel,
-    onSelectedChanged: (Boolean) -> Unit
+    onClick: (Game) -> Unit = {}
 ) {
     Card(
         modifier = Modifier
@@ -151,13 +178,17 @@ fun GameHistoryItemRow(
                 Text(text = "Data Partita: ${formatDate(gameHistory.date)}", fontSize = 16.sp)
             }
 
-            Checkbox(
-                checked = gameHistory.isSelected,
-                onCheckedChange = { isSelected ->
-                    onSelectedChanged(isSelected)
-                    gameHistory.isSelected = isSelected
-                }
-            )
+            Button(
+                onClick = { onClick(gameHistory) },
+                colors = ButtonDefaults.buttonColors(Blue3),
+                shape = RoundedCornerShape(15.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = null,
+                    tint = W
+                )
+            }
         }
     }
 }
@@ -168,4 +199,36 @@ private fun formatDate(timestamp: Long): String {
     val calendar = Calendar.getInstance()
     calendar.timeInMillis = timestamp
     return dateFormat.format(calendar.time)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+@Preview(showBackground = true)
+@Composable
+fun GreetingPreview() {
+    val context = LocalContext.current
+    val db = DBMastermind.getInstance(context)
+    val repository = Repository(db.daoGameHistory())
+    val instantGame = InstantGame(repository)
+    val vm = MyViewModel(instantGame, repository)
+    val navController = rememberNavController()
+
+
+    MasterMindTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = Background
+        ) {
+            History(vm = vm, navController = navController)
+        }
+    }
 }

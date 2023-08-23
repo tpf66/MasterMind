@@ -2,18 +2,35 @@ package com.simoni.name.mastermind.model
 
 import com.simoni.name.mastermind.db.Game
 import com.simoni.name.mastermind.db.Repository
+import com.simoni.name.mastermind.model.utils.GameState
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.absoluteValue
 
 class MyViewModel(inGame: InstantGame, repo: Repository) {
-    val instantGame : InstantGame
-    val repository : Repository
-    //var state = mutableStateOf(Init)
-    var n = 0
+    var instantGame : InstantGame
+    var repository : Repository
 
     init {
         instantGame = inGame
         repository = repo
+    }
+
+    fun newGame(){
+        if (instantGame.status.value != GameState.Ongoing) {
+            instantGame.newMatch()
+
+            CoroutineScope(Dispatchers.Default).launch {
+                while (true) {
+                    if (instantGame.status.value == GameState.Ongoing)
+                        instantGame.duration.value =
+                            System.currentTimeMillis() - instantGame.startTime.absoluteValue
+                    Thread.sleep(500)
+                }
+            }
+        }
     }
 
     suspend fun getAllGameHistory(): List<Game> {
@@ -22,56 +39,7 @@ class MyViewModel(inGame: InstantGame, repo: Repository) {
         }
     }
 
-    suspend fun deleteSelectedGames(selectedGames: List<Game>) {
-        for (game in selectedGames) {
-            repository.deleteGameHistory(game)
-        }
+    suspend fun deleteSelectedGames(game: Game) {
+        repository.deleteGameHistory(game)
     }
 }
-
-
-// // Home Function
-// fun playHome() {
-// state.value = Match
-// }
-//
-// fun continueHome() {
-// state.value = Match
-// // visualizza la partita interrotta
-// }
-//
-// fun historyHome() {
-// state.value = History
-// // va nella schermata della history
-// }
-//
-//
-// // Match function
-// fun guessMatch() {
-// // implementa il tentativo e il gioco,
-// // controlla se il giocatore ha vinto o no
-// }
-//
-// fun backMatch() {
-// state.value = Init
-// // torna alla schermata iniziale, tenendo in memoria la partita
-// }
-//
-// fun closeMatch() {
-// // chiude la partita e salva su db
-// }
-//
-//
-// // History function
-// fun deleteGameHistory() {
-// // elimina una entry dal db
-// }
-//
-// fun backHistory() {
-// state.value = Init
-// // torna alla schermata home
-// }
-//
-// fun loadGameHistory() {
-// // se ci va carica una partita lasciata a meta
-// }

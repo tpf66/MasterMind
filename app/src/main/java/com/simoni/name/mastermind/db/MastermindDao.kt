@@ -20,5 +20,5 @@ interface MastermindDao {
     fun getAllGameHistory(): List<Game>
 
     @Query("SELECT MAX(id) + 1 FROM game_history")
-    suspend fun getNextId(): Long
+    suspend fun getNextId(): Long?
 }

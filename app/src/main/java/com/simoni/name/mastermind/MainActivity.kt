@@ -11,12 +11,21 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.simoni.name.mastermind.db.DBMastermind
+import com.simoni.name.mastermind.db.Game
 import com.simoni.name.mastermind.db.Repository
 import com.simoni.name.mastermind.model.InstantGame
 import com.simoni.name.mastermind.model.MyViewModel
 import com.simoni.name.mastermind.screen.*
 import com.simoni.name.mastermind.ui.theme.Background
 import com.simoni.name.mastermind.ui.theme.MasterMindTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.withContext
 
 
 class MainActivity : ComponentActivity() {
@@ -27,10 +36,26 @@ class MainActivity : ComponentActivity() {
                 val context = LocalContext.current
                 val db =  DBMastermind.getInstance(context)
                 val repository = Repository(db.daoGameHistory())
-                val instantGame = InstantGame(repository)
-                //val vm : MyViewModel = ViewModelProvider(this)[MyViewModel(instantGame,repository,Application())::class.java]
+                val instantGame by remember { mutableStateOf(InstantGame(repository)) }
                 val vm = MyViewModel(instantGame, repository)
                 val navController = rememberNavController()
+
+                val game = Game(
+                    id = 1,
+                    version = "1.0",
+                    secretCode = instantGame.secret.value,
+                    result = "win",
+                    attempts = 3,
+                    duration = 3,
+                    date = System.currentTimeMillis()
+                )
+
+                runBlocking{
+                    withContext(Dispatchers.IO) {
+                        repository.deleteAllGameHistory()
+                        repository.insert(game)
+                    }
+                }
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),

@@ -1,5 +1,6 @@
 package com.simoni.name.mastermind.screen
 
+import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -43,6 +44,22 @@ import com.simoni.name.mastermind.model.MyViewModel
 import com.simoni.name.mastermind.model.utils.Attempt
 import com.simoni.name.mastermind.ui.theme.*
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.shape.CutCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import com.simoni.name.mastermind.model.utils.GameState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
+import kotlin.math.absoluteValue
+
 
 @Composable
 fun GameView(vm: MyViewModel, navController: NavHostController) {
@@ -50,13 +67,38 @@ fun GameView(vm: MyViewModel, navController: NavHostController) {
 
     when (configuration.orientation) {
         Configuration.ORIENTATION_PORTRAIT -> {
-            val selectedColors = remember { mutableStateListOf<String>("X","X","X","X","X") }
+            val selectedColors = remember { mutableStateListOf<String>("X", "X", "X", "X", "X") }
 
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    Button(
+                        onClick = { navController.navigate("Home") },
+                        colors = ButtonDefaults.buttonColors(Blue3),
+                        shape = RoundedCornerShape(15.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Home,
+                            contentDescription = null,
+                            tint = W
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.weight(0.1f))
+                    Text(
+                        text = formatHour(vm.instantGame.duration.value),
+                        color = W,
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
                 Spacer(modifier = Modifier.weight(0.5f))
 
                 // Area di gioco con tentativi
@@ -71,8 +113,8 @@ fun GameView(vm: MyViewModel, navController: NavHostController) {
                 ColorSelection(vm, selectedColors)
                 { color ->
                     if (selectedColors.size < 8) {
-                        for (i in 0 until selectedColors.size){
-                            if (selectedColors[i] == "X"){
+                        for (i in 0 until selectedColors.size) {
+                            if (selectedColors[i] == "X") {
                                 selectedColors[i] = color
                                 break
                             }
@@ -85,7 +127,7 @@ fun GameView(vm: MyViewModel, navController: NavHostController) {
                 // Pulsante Submit
                 ButtonGuess(vm, selectedColors)
                 { selectedColor ->
-                    val reset = listOf("X","X","X","X","X")
+                    val reset = listOf("X", "X", "X", "X", "X")
                     vm.instantGame.attempt(selectedColor.joinToString(separator = ""))
                     selectedColors.clear()
                     selectedColors.addAll(reset)
@@ -98,6 +140,13 @@ fun GameView(vm: MyViewModel, navController: NavHostController) {
     }
 }
 
+@Composable
+private fun formatHour(timestamp: Long): String {
+    val hourFormat = SimpleDateFormat("mm:ss", Locale.getDefault())
+    val calendar = Calendar.getInstance()
+    calendar.timeInMillis = timestamp
+    return hourFormat.format(calendar.time)
+}
 
 
 @Composable
@@ -132,46 +181,34 @@ fun GameArea(
             .verticalScroll(rememberScrollState())
     ) {
         for (rowIndex in 0 until 10) {
-            if (rowIndex == attempts.size){
-            Row(
-                modifier = Modifier
+            val myModifier : Modifier = if (rowIndex == attempts.size) {
+                Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)
-                    .border(BorderStroke(3.dp, Color.Black), shape = RoundedCornerShape(15.dp)) ,
+                    .border(BorderStroke(3.dp, W), shape = CutCornerShape(15.dp))
+            }else {
+                Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            }
+
+            Row(
+                modifier = myModifier,
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 if (rowIndex < attempts.size) {
                     for (i in 0 until 5) {
-                        EmptyCircle(attempts[rowIndex].guess.get(i).toString()){}
+                        EmptyCircle(attempts[rowIndex].guess.get(i).toString()) {}
                     }
-                }else if (rowIndex == attempts.size){
+                } else if (rowIndex == attempts.size) {
                     for (i in 0 until 5)
                         EmptyCircle(selectedColors[i], onClick = { onClick(i) })
-                }else{
+                } else {
                     for (i in 0 until 5)
-                        EmptyCircle(selectedColor = "X"){}
+                        EmptyCircle(selectedColor = "X") {}
                 }
             }
-            }else{
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    if (rowIndex < attempts.size) {
-                        for (i in 0 until 5) {
-                            EmptyCircle(attempts[rowIndex].guess.get(i).toString()){}
-                        }
-                    }else if (rowIndex == attempts.size){
-                        for (i in 0 until 5)
-                            EmptyCircle(selectedColors[i], onClick = { onClick(i) })
-                    }else{
-                        for (i in 0 until 5)
-                            EmptyCircle(selectedColor = "X"){}
-                    }
-                }
-            }
+
             Spacer(modifier = Modifier.height(8.dp))
         }
     }
@@ -200,7 +237,7 @@ fun EmptyCircle(
             .size(30.dp)
             .clickable { onClick() }
             .border(3.dp, Color.Black, shape = CircleShape)
-    ){
+    ) {
         drawCircle(
             color = colorValue
         )
@@ -260,6 +297,7 @@ fun ColorButton(
             Box(
                 modifier = Modifier
                     .size(36.dp)
+                    .border(1.dp, shape = CircleShape, color = Color.Black)
                     .background(
                         color = colorValue,
                         shape = CircleShape
@@ -270,21 +308,9 @@ fun ColorButton(
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun GreetingPreviewGame() {
     val context = LocalContext.current
     val db = DBMastermind.getInstance(context)
     val repository = Repository(db.daoGameHistory())

@@ -1,5 +1,6 @@
 package com.simoni.name.mastermind.screen
 
+import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
@@ -31,9 +32,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.simoni.name.mastermind.model.MyViewModel
+import com.simoni.name.mastermind.model.utils.GameState
 import com.simoni.name.mastermind.model.utils.MyViewState
 import com.simoni.name.mastermind.ui.theme.*
-
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import kotlin.math.absoluteValue
 
 
 @Composable
@@ -53,7 +60,12 @@ fun Home(vm: MyViewModel, navController: NavHostController) {
                     color = W,
                     fontWeight = FontWeight.Bold
                 )
-                HomeButton(text = "New Game", onClick = { navController.navigate("GameView") })
+
+                HomeButton(text = if (vm.instantGame.status.value == GameState.Ongoing) "Continue" else "New Game") {
+                    vm.newGame()
+                    navController.navigate("GameView")
+                }
+
                 Spacer(modifier = Modifier.height(16.dp))
                 HomeButton(text = "Game History", onClick = { navController.navigate("History") })
             }
@@ -65,10 +77,9 @@ fun Home(vm: MyViewModel, navController: NavHostController) {
 }
 
 
-
 @Composable
 fun HomeButton(
-    text : String,
+    text: String,
     onClick: () -> Unit = {}
 ) {
     Button(
@@ -76,10 +87,11 @@ fun HomeButton(
         colors = ButtonDefaults.buttonColors(Blue3),
         shape = RoundedCornerShape(15.dp),
         border = BorderStroke(3.dp, Green),
-        elevation =  ButtonDefaults.elevatedButtonElevation(
+        elevation = ButtonDefaults.elevatedButtonElevation(
             defaultElevation = 10.dp,
             pressedElevation = 15.dp,
-            disabledElevation = 0.dp),
+            disabledElevation = 0.dp
+        ),
         modifier = Modifier
             .height(55.dp)
             .width(200.dp)
