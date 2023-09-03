@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.simoni.name.mastermind.model.MyViewModel
+import com.simoni.name.mastermind.model.utils.Difficulty
 import com.simoni.name.mastermind.model.utils.GameState
 import com.simoni.name.mastermind.model.utils.MyViewState
 import com.simoni.name.mastermind.ui.theme.*
@@ -65,16 +66,26 @@ fun Home(vm: MyViewModel, navController: NavHostController) {
                 )
 
                 Spacer(modifier = Modifier.weight(0.5f))
-
-                HomeButton(text = if (vm.instantGame.status.value == GameState.Ongoing) "Continue" else "New Game") {
-                    vm.newGame()
+                HomeButton(text = "Easy") {
                     navController.navigate("GameView")
+                    vm.instantGame.difficulty.value = Difficulty.Easy
+                    vm.newGame()
                 }
 
                 Spacer(modifier = Modifier.weight(0.1f))
+                HomeButton(text = "Normal") {
+                    navController.navigate("GameView")
+                    vm.instantGame.difficulty.value = Difficulty.Normal
+                    vm.newGame()
+                }
 
+                Spacer(modifier = Modifier.weight(0.2f))
                 HomeButton(text = "Game History", onClick = { navController.navigate("History") })
+
                 Spacer(modifier = Modifier.weight(0.7f))
+
+                /*HomeButton(text = "Settings", onClick = {navController.navigate("Settings")})
+                Spacer(modifier = Modifier.weight(0.7f))*/
             }
         }
 

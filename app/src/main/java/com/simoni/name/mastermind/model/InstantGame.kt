@@ -2,22 +2,19 @@ package com.simoni.name.mastermind.model
 
 
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import com.simoni.name.mastermind.db.Game
 import com.simoni.name.mastermind.db.Repository
 import com.simoni.name.mastermind.model.utils.Attempt
+import com.simoni.name.mastermind.model.utils.Difficulty
 import com.simoni.name.mastermind.model.utils.GameState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import kotlin.math.absoluteValue
 
 
 class InstantGame(private val repository: Repository) {
@@ -30,7 +27,9 @@ class InstantGame(private val repository: Repository) {
     var life = mutableIntStateOf(10)
     val colorOptions = listOf("B","R","O","Y","G","C","P","W")
     var duration= mutableStateOf(0L)
+    var difficulty = mutableStateOf(Difficulty.Normal)
     var currentId: Long = -1L
+    var isGameModified = mutableStateOf(false)
 
 
     init {
@@ -48,12 +47,23 @@ class InstantGame(private val repository: Repository) {
         isGameFinished.value = false
         startTime = System.currentTimeMillis()
         status.value = GameState.Ongoing
+        life.value = 10
     }
 
     private fun generateRandomSecret(): String {
-        return buildString {
-            repeat(5) {
-                append(colorOptions.random())
+        return if (difficulty.value == Difficulty.Normal) {
+            buildString {
+                repeat(5) {
+                    append(colorOptions.random())
+                }
+            }
+        } else {
+            // Modalità Facile: Genera un codice segreto senza colori ripetuti
+            val shuffledColors = colorOptions.shuffled().distinct()
+            if (shuffledColors.size >= 5) {
+                return shuffledColors.take(5).joinToString(separator = "")
+            } else {
+                return ""
             }
         }
     }
@@ -105,6 +115,7 @@ class InstantGame(private val repository: Repository) {
 
         attempts.add(Attempt(guess, nrr, nrw))
         life.value -= 1
+        isGameModified.value = true
 
         if (nrr == secret.value.length) {
             status.value = GameState.Win
@@ -123,26 +134,6 @@ class InstantGame(private val repository: Repository) {
             }
         }
         return howMany
-    }
-
-
-    fun saveOnDb() {
-        duration.value = System.currentTimeMillis() - startTime
-        val game = Game(
-            id = currentId++,
-            version = "1.0",
-            secretCode = secret.value,
-            result = if (isGameFinished.value) "Game Over" else "Correct Combination!",
-            attempts = attempts.size,
-            duration = duration.value,
-            date = System.currentTimeMillis()
-        )
-
-        runBlocking {
-            withContext(Dispatchers.IO) {
-                repository.insert(game)
-            }
-        }
     }
 
 

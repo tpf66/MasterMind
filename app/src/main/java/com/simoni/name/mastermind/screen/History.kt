@@ -1,6 +1,8 @@
 package com.simoni.name.mastermind.screen
 
+import android.annotation.SuppressLint
 import android.content.res.Configuration
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
@@ -63,6 +66,25 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.CardColors
+import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
+import com.simoni.name.mastermind.model.utils.GameState
+import com.simoni.name.mastermind.ui.theme.B
+import com.simoni.name.mastermind.ui.theme.Background2
+import com.simoni.name.mastermind.ui.theme.C
+import com.simoni.name.mastermind.ui.theme.G
+import com.simoni.name.mastermind.ui.theme.O
+import com.simoni.name.mastermind.ui.theme.P
+import com.simoni.name.mastermind.ui.theme.R
+import com.simoni.name.mastermind.ui.theme.Y
+
+
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun History(vm: MyViewModel, navController: NavHostController) {
     val configuration = LocalConfiguration.current
@@ -71,6 +93,7 @@ fun History(vm: MyViewModel, navController: NavHostController) {
         Configuration.ORIENTATION_PORTRAIT -> {
             var gameHistoryList by remember { mutableStateOf<List<Game>>(emptyList()) }
             val stateLazy = rememberLazyListState()
+            val coroutineScope = rememberCoroutineScope()
 
             LaunchedEffect(Unit) {
                 gameHistoryList = withContext(Dispatchers.IO) {
@@ -80,15 +103,16 @@ fun History(vm: MyViewModel, navController: NavHostController) {
 
             Column(
                 modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.SpaceBetween,
+                verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Row (
+                Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start
-                ){
+                ) {
                     Button(
+                        modifier = Modifier.padding(16.dp),
                         onClick = { navController.navigate("Home") },
                         colors = ButtonDefaults.buttonColors(Blue3),
                         shape = RoundedCornerShape(15.dp)
@@ -101,11 +125,11 @@ fun History(vm: MyViewModel, navController: NavHostController) {
                     }
                 }
 
-                if (gameHistoryList.isEmpty()){
+                if (gameHistoryList.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
-                    ){
+                    ) {
                         Text(
                             text = "Empty history",
                             color = W,
@@ -113,22 +137,27 @@ fun History(vm: MyViewModel, navController: NavHostController) {
                             fontWeight = FontWeight.Bold
                         )
                     }
-                }else {
+                } else {
+                    coroutineScope.launch { stateLazy.animateScrollToItem(gameHistoryList.size) }
+
                     LazyColumn(
-                        modifier = Modifier,
+                        reverseLayout = true,
                         userScrollEnabled = true,
-                        state = stateLazy
-                    ) {
+                        state = stateLazy,
+
+                        ) {
                         itemsIndexed(gameHistoryList) { index, it ->
 
-                            GameHistoryItemRow(gameHistory = it)
-                            { gameToDelete ->
+                            GameHistoryItemRow(
+                                gameHistory = it,
+                                vm,
+                                navController
+                            ) { gameToDelete ->
                                 CoroutineScope(Dispatchers.IO).launch {
                                     vm.deleteSelectedGames(gameToDelete)
                                     gameHistoryList = vm.getAllGameHistory()
                                 }
                             }
-
                         }
                     }
                 }
@@ -144,6 +173,8 @@ fun History(vm: MyViewModel, navController: NavHostController) {
 @Composable
 fun GameHistoryItemRow(
     gameHistory: Game,
+    vm: MyViewModel,
+    navController: NavHostController,
     onClick: (Game) -> Unit = {}
 ) {
     Card(
@@ -161,33 +192,110 @@ fun GameHistoryItemRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .padding(5.dp),
+                verticalArrangement = Arrangement.SpaceAround
             ) {
-                Text(text = "ID: ${gameHistory.id}", fontSize = 16.sp)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "Versione App: ${gameHistory.version}", fontSize = 16.sp)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "Codice Segreto: ${gameHistory.secretCode}", fontSize = 16.sp)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "Risultato: ${gameHistory.result}", fontSize = 16.sp)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "Tentativi: ${gameHistory.attempts}", fontSize = 16.sp)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "Durata Partita: ${gameHistory.duration} ms", fontSize = 16.sp)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "Data Partita: ${formatDate(gameHistory.date)}", fontSize = 16.sp)
+                Row{
+                    Text(
+                        text = "Codice segreto: ",
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(2.dp),
+                        color = Color.Black
+                    )
+
+                    for (color in gameHistory.secretCode) {
+                        Canvas(
+                            modifier = Modifier
+                                .size(20.dp)
+                                .padding(2.dp),
+                            onDraw = {
+                                drawCircle(
+                                    color = if (gameHistory.result == GameState.Ongoing.toString()) Background2
+                                    else colorForCode(color.toString()), // Funzione per ottenere il colore corrispondente
+                                    radius = size.minDimension / 2
+                                )
+                                drawCircle(
+                                    color = Color.Black,
+                                    radius = size.minDimension / 2,
+                                    style = Stroke(width = 2.dp.toPx())
+                                )
+                            }
+                        )
+                    }
+                }
+
+                Text(
+                    text = "Risultato: ${gameHistory.result}",
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(2.dp),
+                    color = Color.Black
+                )
+
+                Text(
+                    text = "DIfficoltà: ${gameHistory.difficulty}",
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(2.dp),
+                    color = Color.Black
+                )
+
+                Text(
+                    text = "Tentativi: ${gameHistory.numatt}",
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(2.dp),
+                    color = Color.Black
+                )
+
+                Text(
+                    text = "Durata Partita: ${formatHour(timestamp = gameHistory.duration)}",
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(2.dp),
+                    color = Color.Black
+                )
+
+                Text(
+                    text = "Data Partita: ${formatDate(gameHistory.date)}",
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(2.dp),
+                    color = Color.Black
+                )
             }
 
-            Button(
-                onClick = { onClick(gameHistory) },
-                colors = ButtonDefaults.buttonColors(Blue3),
-                shape = RoundedCornerShape(15.dp)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceAround
             ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = null,
-                    tint = W
-                )
+                Button(
+                    modifier = Modifier.padding(5.dp),
+                    onClick = { onClick(gameHistory) },
+                    colors = ButtonDefaults.buttonColors(Blue3),
+                    shape = RoundedCornerShape(15.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = null,
+                        tint = W
+                    )
+                }
+                if (gameHistory.result == GameState.Ongoing.toString()) {
+                    Button(
+                        modifier = Modifier.padding(5.dp),
+                        onClick = {
+                            vm.loadGame(gameHistory)
+
+                            onClick(gameHistory)
+                            navController.navigate("GameView")
+                        },
+                        colors = ButtonDefaults.buttonColors(Blue3),
+                        shape = RoundedCornerShape(15.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.PlayArrow,
+                            contentDescription = null,
+                            tint = W
+                        )
+                    }
+                }
             }
         }
     }
@@ -202,13 +310,27 @@ private fun formatDate(timestamp: Long): String {
 }
 
 
+@Composable
+private fun formatHour(timestamp: Long): String {
+    val hourFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+    val calendar = Calendar.getInstance()
+    calendar.timeInMillis = timestamp
+    return hourFormat.format(calendar.time)
+}
 
-
-
-
-
-
-
+fun colorForCode(code: String): Color {
+    return when (code) {
+        "W" -> W
+        "R" -> R
+        "C" -> C
+        "G" -> G
+        "Y" -> Y
+        "P" -> P
+        "O" -> O
+        "B" -> B
+        else -> Background2// Colore di default o gestire altri casi
+    }
+}
 
 
 
@@ -221,14 +343,32 @@ fun GreetingPreview() {
     val instantGame = InstantGame(repository)
     val vm = MyViewModel(instantGame, repository)
     val navController = rememberNavController()
+    var gameHistoryList by remember { mutableStateOf<List<Game>>(emptyList()) }
 
+    val stateLazy = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
 
+    val game = Game(
+        id = 1,
+        version = "1.0",
+        secretCode = instantGame.secret.value,
+        stratt = "",
+        numatt = 0,
+        result = "win",
+        //attempts = 3,
+        duration = 3,
+        date = System.currentTimeMillis(),
+        difficulty = vm.instantGame.difficulty.value
+    )
+    var games: List<Game> = listOf(game, game)
+
+    gameHistoryList = games
     MasterMindTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = Background
         ) {
-            History(vm = vm, navController = navController)
+            //GameHistoryItemRow(gameHistory = game)
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.simoni.name.mastermind.screen
 
 import android.content.res.Configuration
+import androidx.activity.OnBackPressedDispatcher
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -42,26 +43,34 @@ import com.simoni.name.mastermind.model.MyViewModel
 import com.simoni.name.mastermind.model.utils.Attempt
 import com.simoni.name.mastermind.ui.theme.*
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.simoni.name.mastermind.model.utils.Difficulty
+import com.simoni.name.mastermind.model.utils.GameState
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
 
 @Composable
-fun GameView(vm: MyViewModel, navController: NavHostController) {
+fun GameView(vm: MyViewModel, navController: NavHostController, dispatcher: OnBackPressedDispatcher) {
     val configuration = LocalConfiguration.current
+    val showDialog = remember { mutableStateOf(false) }
 
     when (configuration.orientation) {
         Configuration.ORIENTATION_PORTRAIT -> {
             val selectedColors = remember { mutableStateListOf<String>("X", "X", "X", "X", "X") }
+            val clickable = remember { mutableStateOf<Boolean>(true) }
 
             Column(
                 modifier = Modifier
@@ -75,7 +84,10 @@ fun GameView(vm: MyViewModel, navController: NavHostController) {
                 ) {
                     Button(
                         onClick = {
-                            navController.navigate("Home") },
+                            if (clickable.value) {
+                                showDialog.value = true
+                            }
+                        },
                         colors = ButtonDefaults.buttonColors(Blue3),
                         shape = RoundedCornerShape(15.dp)
                     ) {
@@ -99,7 +111,9 @@ fun GameView(vm: MyViewModel, navController: NavHostController) {
                 // Area di gioco con tentativi
                 GameArea(vm.instantGame.attempts, selectedColors)
                 { i ->
-                    selectedColors[i] = "X"
+                    if (clickable.value) {
+                        selectedColors[i] = "X"
+                    }
                 }
 
                 Spacer(modifier = Modifier.weight(0.5f))
@@ -107,10 +121,13 @@ fun GameView(vm: MyViewModel, navController: NavHostController) {
                 // Sezione di selezione dei colori
                 ColorSelection(vm, selectedColors)
                 { color ->
-                    if (selectedColors.size < 8) {
+                    if (selectedColors.contains("X") && clickable.value) {
                         for (i in 0 until selectedColors.size) {
                             if (selectedColors[i] == "X") {
-                                selectedColors[i] = color
+                                if (vm.instantGame.difficulty.value == Difficulty.Easy && !selectedColors.contains(color))
+                                    selectedColors[i] = color
+                                else if (vm.instantGame.difficulty.value == Difficulty.Normal)
+                                    selectedColors[i] = color
                                 break
                             }
                         }
@@ -122,14 +139,132 @@ fun GameView(vm: MyViewModel, navController: NavHostController) {
                 // Pulsante Submit
                 ButtonGuess(vm, selectedColors)
                 { selectedColor ->
-                    val reset = listOf("X", "X", "X", "X", "X")
-                    vm.instantGame.attempt(selectedColor.joinToString(separator = ""))
-                    selectedColors.clear()
-                    selectedColors.addAll(reset)
+                    if(!selectedColors.contains("X") && clickable.value) {
+                        val reset = listOf("X", "X", "X", "X", "X")
+                        vm.instantGame.attempt(selectedColor.joinToString(separator = ""))
+                        selectedColors.clear()
+                        selectedColors.addAll(reset)
+                    }
                 }
             }
-        }
+            if (vm.instantGame.isGameFinished.value) {
+                clickable.value = false
 
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.7f)) // Sfondo semitrasparente
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(W)
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = if (vm.instantGame.status.value == GameState.Win) "You Win!" else "You Lose!",
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                            fontSize =30.sp,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+
+                        Row(
+                            modifier = Modifier.padding(bottom = 16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            for (color in vm.instantGame.secret.value) {
+                                Canvas(
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .padding(2.dp),
+                                    onDraw = {
+                                        drawCircle(
+                                            color = getColorForCode(color.toString()), // Funzione per ottenere il colore corrispondente
+                                            radius = size.minDimension / 2
+                                        )
+                                        drawCircle(
+                                            color = Color.Black,
+                                            radius = size.minDimension / 2,
+                                            style = Stroke(width = 2.dp.toPx())
+                                        )
+                                    }
+                                )
+                            }
+                        }
+
+                        // Aggiungi il pulsante "Home"
+                        Button(
+                            onClick = {
+                                navController.navigate("Home")
+                                vm.saveOnDb()
+                                      },
+                            colors = ButtonDefaults.buttonColors(Blue2),
+                            shape = RoundedCornerShape(15.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Home,
+                                contentDescription = null,
+                                tint = W
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Home",
+                                color = W
+                            )
+                        }
+                    }
+                }
+            }else{
+                clickable.value = true
+            }
+            if (showDialog.value) {
+                AlertDialog(
+                    onDismissRequest = {
+                        // Chiudi il dialog senza salvare
+                        showDialog.value = false
+                    },
+                    title = { Text("Salvare la partita?") },
+                    text = { Text("La partita non è stata completata. Vuoi salvarla prima di uscire?") },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                // Chiama la funzione per salvare la partita sul database
+                                vm.saveOnDb()
+                                vm.instantGame.status.value = GameState.Load
+
+                                // Esegui le azioni di navigazione desiderate
+                                navController.navigate("Home")
+
+                                // Chiudi il dialog
+                                showDialog.value = false
+                            }
+                        ) {
+                            Text("Salva")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = {
+                                // Esegui le azioni di navigazione desiderate
+                                navController.navigate("Home")
+
+                                // non salvare la partita
+                                vm.instantGame.status.value = GameState.Load
+
+                                // Chiudi il dialog senza salvare
+                                showDialog.value = false
+                            }
+                        ) {
+                            Text("No")
+                        }
+                    }
+                )
+            }
+        }
         else -> {
         }
     }
@@ -211,7 +346,7 @@ fun GameArea(
 
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(0.5f),
+                    modifier = Modifier.fillMaxWidth(1f),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -234,6 +369,7 @@ fun FeedBack(nrr: Int, nrw: Int) {
             .size(50.dp)
         ) {
             val radius = 5.dp.toPx()
+            val border = 1.dp.toPx()
             val circle = mutableStateListOf<Color>(W,W,W,W,W)
 
             for (i in 0 until nrr)
@@ -245,33 +381,63 @@ fun FeedBack(nrr: Int, nrw: Int) {
 
 
             translate(left = -30f, top = -15f) {
+
                 drawCircle(
-                    color = circle[0],
+                    color = Background2,
                     radius = radius,
+                    //style = Stroke(width = border)
+                )
+                drawCircle(
+                        color = circle[0],
+                radius = radius
                 )
             }
             translate(left = 0f, top = -15f) {
+
                 drawCircle(
-                    color = circle[1],
+                    color = Background2,
                     radius = radius,
+                    //style = Stroke(width = border)
+                )
+                drawCircle(
+                        color = circle[1],
+                radius = radius,
                 )
             }
             translate(left = 30f, top = -15f) {
+
                 drawCircle(
-                    color = circle[2],
+                    color = Background2,
                     radius = radius,
+                    //style = Stroke(width = border)
+                )
+                drawCircle(
+                        color = circle[2],
+                radius = radius,
                 )
             }
             translate(left = -15f, top = 15f) {
+
                 drawCircle(
-                    color = circle[3],
-                    radius = radius
+                    color = Background2,
+                    radius = radius,
+                    //style = Stroke(width = border)
+                )
+                drawCircle(
+                        color = circle[3],
+                radius = radius
                 )
             }
             translate(left = 15f, top = 15f) {
+
                 drawCircle(
-                    color = circle[4],
-                    radius = radius
+                    color = Background2,
+                    radius = radius,
+                    //style = Stroke(width = border)
+                )
+                drawCircle(
+                        color = circle[4],
+                radius = radius
                 )
             }
         }
@@ -305,7 +471,7 @@ fun EmptyCircle(
         "P" -> P
         "O" -> O
         "B" -> B
-        else -> Color.Transparent
+        else -> Background2
     }
 
     Canvas(
@@ -384,6 +550,20 @@ fun ColorButton(
     )
 }
 
+fun getColorForCode(code: String): Color {
+    return when (code) {
+        "W" -> W
+        "R" -> R
+        "C" -> C
+        "G" -> G
+        "Y" -> Y
+        "P" -> P
+        "O" -> O
+        "B" -> B
+        else -> Color.Black// Colore di default o gestire altri casi
+    }
+}
+
 
 @Preview(showBackground = true)
 @Composable
@@ -400,7 +580,7 @@ fun GreetingPreviewGame() {
             modifier = Modifier.fillMaxSize(),
             color = Background
         ) {
-            GameView(vm = vm, navController = navController)
+            GameView(vm = vm, navController = navController, dispatcher = OnBackPressedDispatcher())
         }
     }
 }
