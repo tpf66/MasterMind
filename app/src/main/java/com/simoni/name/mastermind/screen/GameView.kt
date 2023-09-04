@@ -380,7 +380,7 @@ fun FeedBack(nrr: Int, nrw: Int) {
                 circle[i] = Color.Transparent
 
 
-            translate(left = -30f, top = -15f) {
+            translate(left = -35f, top = -20f) {
 
                 drawCircle(
                     color = Background2,
@@ -392,7 +392,7 @@ fun FeedBack(nrr: Int, nrw: Int) {
                 radius = radius
                 )
             }
-            translate(left = 0f, top = -15f) {
+            translate(left = 0f, top = -20f) {
 
                 drawCircle(
                     color = Background2,
@@ -404,7 +404,7 @@ fun FeedBack(nrr: Int, nrw: Int) {
                 radius = radius,
                 )
             }
-            translate(left = 30f, top = -15f) {
+            translate(left = 35f, top = -20f) {
 
                 drawCircle(
                     color = Background2,
@@ -416,7 +416,7 @@ fun FeedBack(nrr: Int, nrw: Int) {
                 radius = radius,
                 )
             }
-            translate(left = -15f, top = 15f) {
+            translate(left = -20f, top = 20f) {
 
                 drawCircle(
                     color = Background2,
@@ -428,7 +428,7 @@ fun FeedBack(nrr: Int, nrw: Int) {
                 radius = radius
                 )
             }
-            translate(left = 15f, top = 15f) {
+            translate(left = 20f, top = 20f) {
 
                 drawCircle(
                     color = Background2,

@@ -25,7 +25,7 @@ class MyViewModel(inGame: InstantGame, repo: Repository) {
         repository = repo
     }
 
-    fun newGame(){
+    fun newGame() {
         if (instantGame.status.value != GameState.Ongoing) {
             instantGame.newMatch()
 
@@ -62,10 +62,10 @@ class MyViewModel(inGame: InstantGame, repo: Repository) {
 
         instantGame.secret.value = game.secretCode
         instantGame.attempts = toAttempt(game.stratt, game.numatt) // Resetta la lista di tentativi
-        instantGame.duration.value = game.duration
+        instantGame.duration.value = 0L
         instantGame.date.value = formatDate(System.currentTimeMillis())
         instantGame.isGameFinished.value = false
-        instantGame.startTime = System.currentTimeMillis()
+        instantGame.startTime = System.currentTimeMillis() - game.duration
         instantGame.status.value = GameState.Ongoing
         instantGame.life.value = 10-game.numatt
         instantGame.difficulty.value = game.difficulty

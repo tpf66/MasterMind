@@ -70,16 +70,19 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.CardColors
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import com.simoni.name.mastermind.model.utils.GameState
 import com.simoni.name.mastermind.ui.theme.B
 import com.simoni.name.mastermind.ui.theme.Background2
+import com.simoni.name.mastermind.ui.theme.Background3
 import com.simoni.name.mastermind.ui.theme.C
 import com.simoni.name.mastermind.ui.theme.G
 import com.simoni.name.mastermind.ui.theme.O
 import com.simoni.name.mastermind.ui.theme.P
+import com.simoni.name.mastermind.ui.theme.Purple80
 import com.simoni.name.mastermind.ui.theme.R
 import com.simoni.name.mastermind.ui.theme.Y
 
@@ -182,6 +185,7 @@ fun GameHistoryItemRow(
             .fillMaxWidth()
             .padding(16.dp),
         shape = RoundedCornerShape(4.dp),
+        colors = CardDefaults.cardColors(containerColor = Background3),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 4.dp
         )
@@ -199,9 +203,8 @@ fun GameHistoryItemRow(
                 Row{
                     Text(
                         text = "Codice segreto: ",
-                        fontSize = 16.sp,
                         modifier = Modifier.padding(2.dp),
-                        color = Color.Black
+                        color = W
                     )
 
                     for (color in gameHistory.secretCode) {
@@ -227,37 +230,32 @@ fun GameHistoryItemRow(
 
                 Text(
                     text = "Risultato: ${gameHistory.result}",
-                    fontSize = 16.sp,
                     modifier = Modifier.padding(2.dp),
-                    color = Color.Black
+                    color = W
                 )
 
                 Text(
                     text = "DIfficoltà: ${gameHistory.difficulty}",
-                    fontSize = 16.sp,
                     modifier = Modifier.padding(2.dp),
-                    color = Color.Black
+                    color = W
                 )
 
                 Text(
                     text = "Tentativi: ${gameHistory.numatt}",
-                    fontSize = 16.sp,
                     modifier = Modifier.padding(2.dp),
-                    color = Color.Black
+                    color = W
                 )
 
                 Text(
                     text = "Durata Partita: ${formatHour(timestamp = gameHistory.duration)}",
-                    fontSize = 16.sp,
                     modifier = Modifier.padding(2.dp),
-                    color = Color.Black
+                    color = W
                 )
 
                 Text(
                     text = "Data Partita: ${formatDate(gameHistory.date)}",
-                    fontSize = 16.sp,
                     modifier = Modifier.padding(2.dp),
-                    color = Color.Black
+                    color = W
                 )
             }
 
