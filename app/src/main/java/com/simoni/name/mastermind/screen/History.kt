@@ -7,14 +7,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,18 +27,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -60,7 +53,6 @@ import com.simoni.name.mastermind.ui.theme.W
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -69,8 +61,6 @@ import java.util.Locale
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.CardColors
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -82,9 +72,9 @@ import com.simoni.name.mastermind.ui.theme.C
 import com.simoni.name.mastermind.ui.theme.G
 import com.simoni.name.mastermind.ui.theme.O
 import com.simoni.name.mastermind.ui.theme.P
-import com.simoni.name.mastermind.ui.theme.Purple80
 import com.simoni.name.mastermind.ui.theme.R
 import com.simoni.name.mastermind.ui.theme.Y
+import java.util.concurrent.TimeUnit
 
 
 @SuppressLint("CoroutineCreationDuringComposition")
@@ -204,6 +194,7 @@ fun GameHistoryItemRow(
                     Text(
                         text = "Codice segreto: ",
                         modifier = Modifier.padding(2.dp),
+                        fontSize = 12.sp,
                         color = W
                     )
 
@@ -231,30 +222,35 @@ fun GameHistoryItemRow(
                 Text(
                     text = "Risultato: ${gameHistory.result}",
                     modifier = Modifier.padding(2.dp),
+                    fontSize = 12.sp,
                     color = W
                 )
 
                 Text(
                     text = "DIfficoltà: ${gameHistory.difficulty}",
                     modifier = Modifier.padding(2.dp),
+                    fontSize = 12.sp,
                     color = W
                 )
 
                 Text(
                     text = "Tentativi: ${gameHistory.numatt}",
                     modifier = Modifier.padding(2.dp),
+                    fontSize = 12.sp,
                     color = W
                 )
 
                 Text(
-                    text = "Durata Partita: ${formatHour(timestamp = gameHistory.duration)}",
+                    text = "Durata Partita: ${formatHour(millis = gameHistory.duration)}",
                     modifier = Modifier.padding(2.dp),
+                    fontSize = 12.sp,
                     color = W
                 )
 
                 Text(
                     text = "Data Partita: ${formatDate(gameHistory.date)}",
                     modifier = Modifier.padding(2.dp),
+                    fontSize = 12.sp,
                     color = W
                 )
             }
@@ -304,16 +300,17 @@ private fun formatDate(timestamp: Long): String {
     val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
     val calendar = Calendar.getInstance()
     calendar.timeInMillis = timestamp
-    return dateFormat.format(calendar.time)
+    val date = dateFormat.format(calendar.time)
+    return date
 }
 
 
 @Composable
-private fun formatHour(timestamp: Long): String {
-    val hourFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
-    val calendar = Calendar.getInstance()
-    calendar.timeInMillis = timestamp
-    return hourFormat.format(calendar.time)
+private fun formatHour(millis: Long): String {
+    val hours = TimeUnit.MILLISECONDS.toHours(millis) % 24;
+    val minutes = TimeUnit.MILLISECONDS.toMinutes(millis) % 60;
+    val seconds = TimeUnit.MILLISECONDS.toSeconds(millis) % 60;
+    return String.format("%d:%d:%d", hours, minutes, seconds)
 }
 
 fun colorForCode(code: String): Color {
@@ -327,46 +324,5 @@ fun colorForCode(code: String): Color {
         "O" -> O
         "B" -> B
         else -> Background2// Colore di default o gestire altri casi
-    }
-}
-
-
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    val context = LocalContext.current
-    val db = DBMastermind.getInstance(context)
-    val repository = Repository(db.daoGameHistory())
-    val instantGame = InstantGame(repository)
-    val vm = MyViewModel(instantGame, repository)
-    val navController = rememberNavController()
-    var gameHistoryList by remember { mutableStateOf<List<Game>>(emptyList()) }
-
-    val stateLazy = rememberLazyListState()
-    val coroutineScope = rememberCoroutineScope()
-
-    val game = Game(
-        id = 1,
-        version = "1.0",
-        secretCode = instantGame.secret.value,
-        stratt = "",
-        numatt = 0,
-        result = "win",
-        //attempts = 3,
-        duration = 3,
-        date = System.currentTimeMillis(),
-        difficulty = vm.instantGame.difficulty.value
-    )
-    var games: List<Game> = listOf(game, game)
-
-    gameHistoryList = games
-    MasterMindTheme {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = Background
-        ) {
-            //GameHistoryItemRow(gameHistory = game)
-        }
     }
 }

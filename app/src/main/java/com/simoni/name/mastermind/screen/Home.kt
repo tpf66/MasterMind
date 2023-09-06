@@ -83,9 +83,6 @@ fun Home(vm: MyViewModel, navController: NavHostController) {
                 HomeButton(text = "Game History", onClick = { navController.navigate("History") })
 
                 Spacer(modifier = Modifier.weight(0.7f))
-
-                /*HomeButton(text = "Settings", onClick = {navController.navigate("Settings")})
-                Spacer(modifier = Modifier.weight(0.7f))*/
             }
         }
 
