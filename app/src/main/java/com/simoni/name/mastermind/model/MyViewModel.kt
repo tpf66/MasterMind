@@ -5,20 +5,18 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.simoni.name.mastermind.db.Game
 import com.simoni.name.mastermind.db.Repository
 import com.simoni.name.mastermind.model.utils.Attempt
-import com.simoni.name.mastermind.model.utils.Difficulty
 import com.simoni.name.mastermind.model.utils.GameState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import java.util.*
 import kotlin.math.absoluteValue
 
 class MyViewModel(inGame: InstantGame, repo: Repository) {
     var instantGame : InstantGame
-    var repository : Repository
+    private var repository : Repository
 
     init {
         instantGame = inGame
@@ -31,9 +29,11 @@ class MyViewModel(inGame: InstantGame, repo: Repository) {
 
             CoroutineScope(Dispatchers.Default).launch {
                 while (instantGame.status.value == GameState.Ongoing) {
-                    instantGame.duration.value =
+                    instantGame.duration.longValue =
                         System.currentTimeMillis() - instantGame.startTime.absoluteValue
-                    Thread.sleep(500)
+                    withContext(Dispatchers.IO) {
+                        Thread.sleep(500)
+                    }
                 }
             }
         }
@@ -47,7 +47,7 @@ class MyViewModel(inGame: InstantGame, repo: Repository) {
             result = instantGame.status.value.toString(),
             stratt = instantGame.attempts.toList().toString(),
             numatt = instantGame.attempts.size,
-            duration = instantGame.duration.value,
+            duration = instantGame.duration.longValue,
             date = System.currentTimeMillis(),
             difficulty = instantGame.difficulty.value
         )
@@ -62,12 +62,12 @@ class MyViewModel(inGame: InstantGame, repo: Repository) {
 
         instantGame.secret.value = game.secretCode
         instantGame.attempts = toAttempt(game.stratt, game.numatt) // Resetta la lista di tentativi
-        instantGame.duration.value = 0L
+        instantGame.duration.longValue = 0L
         instantGame.date.value = formatDate(System.currentTimeMillis())
         instantGame.isGameFinished.value = false
         instantGame.startTime = System.currentTimeMillis() - game.duration
         instantGame.status.value = GameState.Ongoing
-        instantGame.life.value = 10-game.numatt
+        instantGame.life.intValue = 10-game.numatt
         instantGame.difficulty.value = game.difficulty
         instantGame.currentId = game.id
         instantGame.isGameModified.value = false
@@ -87,9 +87,9 @@ class MyViewModel(inGame: InstantGame, repo: Repository) {
 
 fun toAttempt (stratt : String, numatt : Int) : SnapshotStateList<Attempt> {
     val attempts = mutableStateListOf<Attempt>()
-    var guess : String = ""
-    var nrr : Int = 0
-    var nrw : Int = 0
+    var guess: String
+    var nrr: Int
+    var nrw: Int
     var string : String
 
     for (i in 0 until numatt){

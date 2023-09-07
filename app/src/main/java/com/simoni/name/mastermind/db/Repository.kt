@@ -23,10 +23,4 @@ class Repository(private val dao: MastermindDao) {
             dao.deleteGameHistory(game)
         }
     }
-
-    suspend fun deleteAllGameHistory() {
-        withContext(Dispatchers.IO) {
-            dao.deleteAllGameHistory()
-        }
-    }
 }

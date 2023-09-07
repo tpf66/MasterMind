@@ -2,9 +2,9 @@ package com.simoni.name.mastermind.model
 
 
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import com.simoni.name.mastermind.db.Game
 import com.simoni.name.mastermind.db.Repository
 import com.simoni.name.mastermind.model.utils.Attempt
 import com.simoni.name.mastermind.model.utils.Difficulty
@@ -13,8 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import java.util.*
 
 
 class InstantGame(private val repository: Repository) {
@@ -26,7 +25,7 @@ class InstantGame(private val repository: Repository) {
     var status = mutableStateOf(GameState.Load)
     var life = mutableIntStateOf(10)
     val colorOptions = listOf("B","R","O","Y","G","C","P","W")
-    var duration= mutableStateOf(0L)
+    var duration= mutableLongStateOf(0L)
     var difficulty = mutableStateOf(Difficulty.Normal)
     var currentId: Long = -1L
     var isGameModified = mutableStateOf(false)
@@ -42,12 +41,12 @@ class InstantGame(private val repository: Repository) {
     fun newMatch() {
         secret.value = generateRandomSecret()
         attempts.clear() // Resetta la lista di tentativi
-        duration.value = 0L
+        duration.longValue = 0L
         date.value = formatDate(System.currentTimeMillis())
         isGameFinished.value = false
         startTime = System.currentTimeMillis()
         status.value = GameState.Ongoing
-        life.value = 10
+        life.intValue = 10
     }
 
     private fun generateRandomSecret(): String {
@@ -77,11 +76,10 @@ class InstantGame(private val repository: Repository) {
 
 
     fun attempt(guess: String) {
-        var nrr: Int = 0
-        var nrw: Int = 0
+        var nrr = 0
+        var nrw = 0
         var newSecret = ""
         var newGuess = ""
-        var attempt: Attempt
         val evaluatedChars = mutableListOf<Char>()
 
         // Numero di cifre giuste al posto giusto
@@ -99,7 +97,7 @@ class InstantGame(private val repository: Repository) {
             }
         }
 
-        if (!newSecret.isEmpty()) {
+        if (newSecret.isNotEmpty()) {
             for (letter in guess) {
                 if (!evaluatedChars.contains(letter)) {
                     val howManyInSecret = countHowMany(newSecret, letter)
@@ -114,13 +112,13 @@ class InstantGame(private val repository: Repository) {
         }
 
         attempts.add(Attempt(guess, nrr, nrw))
-        life.value -= 1
+        life.intValue -= 1
         isGameModified.value = true
 
         if (nrr == secret.value.length) {
             status.value = GameState.Win
             isGameFinished.value = true
-        } else if (life.value < 1) {
+        } else if (life.intValue < 1) {
             status.value = GameState.Lose
             isGameFinished.value = true
         }
@@ -128,16 +126,11 @@ class InstantGame(private val repository: Repository) {
 
     private fun countHowMany(letters: String, letter: Char): Int {
         var howMany = 0
-        for (i in 0 until letters.length) {
-            if (letters[i] == letter) {
+        for (element in letters) {
+            if (element == letter) {
                 howMany++
             }
         }
         return howMany
-    }
-
-
-    fun loadMatch() {
-        //TODO se ci va
     }
 }

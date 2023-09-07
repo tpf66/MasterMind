@@ -1,3 +1,23 @@
 <resources>
-    <string name="app_name">MasterMind</string>
+    <string name="app_name" translatable="false">Mastermind</string>
+    <string name="home">Home</string>
+    <string name="button_submit">Submit</string>
+    <string name ="secret_code">Secret Code: </string>
+    <string name="game_result_win">You Win!</string>
+    <string name="game_result_lose">You Lose!</string>
+    <string name="dialog_save_game_title">Save the game?</string>
+    <string name="dialog_save_game_message">The game has not been completed. Do you want to save it before exiting?</string>
+    <string name="dialog_save">Save</string>
+    <string name="dialog_no">No</string>
+    <string name="history_empty">Empty history</string>
+    <string name="difficulty_easy">Easy</string>
+    <string name="game_history">Game History</string>
+    <string name="difficulty_normal">Normal</string>
+    <string name="button_home">Home</string>
+    <string name="button_play">Play</string>
+    <string name="difficulty">Difficulty: </string>
+    <string name="attempts">Attempts: </string>
+    <string name="game_result">Result: </string>
+    <string name="game_duration">Duration: </string>
+    <string name="game_date">Date: </string>
 </resources>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home">Home</string>
+    <string name="button_submit">Invia</string>
+    <string name="secret_code">Codice Segreto: </string>
+    <string name="game_result_win">Hai Vinto!</string>
+    <string name="game_result_lose">Hai Perso!</string>
+    <string name="dialog_save_game_title">Salvare la partita?</string>
+    <string name="dialog_save_game_message">La partita non è stata completata. Vuoi salvarla prima di uscire?</string>
+    <string name="dialog_save">Salva</string>
+    <string name="dialog_no">No</string>
+    <string name="history_empty">Storico Vuoto</string>
+    <string name="difficulty_easy">Facile</string>
+    <string name="game_history">Cronologia</string>
+    <string name="difficulty_normal">Normale</string>
+    <string name="button_home">Home</string>
+    <string name="button_play">Gioca</string>
+    <string name="difficulty">Difficoltà: </string>
+    <string name="attempts">Tentativi: </string>
+    <string name="game_result">Risultato: </string>
+    <string name="game_duration">Durata: </string>
+    <string name="game_date">Data: </string>
+</resources>

@@ -1,66 +1,34 @@
 package com.simoni.name.mastermind.screen
 
-import android.content.res.Configuration
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.OnBackPressedDispatcherOwner
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import com.simoni.name.mastermind.db.DBMastermind
-import com.simoni.name.mastermind.db.Repository
-import com.simoni.name.mastermind.model.InstantGame
-import com.simoni.name.mastermind.model.MyViewModel
-import com.simoni.name.mastermind.model.utils.Attempt
-import com.simoni.name.mastermind.ui.theme.*
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Icon
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import com.simoni.name.mastermind.R
+import com.simoni.name.mastermind.model.MyViewModel
+import com.simoni.name.mastermind.model.utils.Attempt
 import com.simoni.name.mastermind.model.utils.Difficulty
 import com.simoni.name.mastermind.model.utils.GameState
+import com.simoni.name.mastermind.ui.theme.*
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import java.util.*
 
 
 @Composable
@@ -72,8 +40,8 @@ fun GameView(
     showDialog: MutableState<Boolean>
 ) {
     dispatcher?.onBackPressedDispatcher?.addCallback(callback)
-    val selectedColors = remember { mutableStateListOf<String>("X", "X", "X", "X", "X") }
-    val clickable = remember { mutableStateOf<Boolean>(true) }
+    val selectedColors = remember { mutableStateListOf("X", "X", "X", "X", "X") }
+    val clickable = remember { mutableStateOf(true) }
 
     Column(
         modifier = Modifier
@@ -122,7 +90,7 @@ fun GameView(
         Spacer(modifier = Modifier.weight(0.5f))
 
         // Sezione di selezione dei colori
-        ColorSelection(vm, selectedColors)
+        ColorSelection(vm)
         { color ->
             if (selectedColors.contains("X") && clickable.value) {
                 for (i in 0 until selectedColors.size) {
@@ -143,7 +111,7 @@ fun GameView(
         Spacer(modifier = Modifier.weight(0.2f))
 
         // Pulsante Submit
-        ButtonGuess(vm, selectedColors)
+        ButtonGuess(selectedColors)
         { selectedColor ->
             if (!selectedColors.contains("X") && clickable.value) {
                 val reset = listOf("X", "X", "X", "X", "X")
@@ -171,7 +139,7 @@ fun GameView(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = if (vm.instantGame.status.value == GameState.Win) "You Win!" else "You Lose!",
+                    text = if (vm.instantGame.status.value == GameState.Win) stringResource(id = R.string.game_result_win) else stringResource(id = R.string.game_result_lose) ,
                     color = Color.Black,
                     fontWeight = FontWeight.Bold,
                     fontSize = 30.sp,
@@ -218,7 +186,7 @@ fun GameView(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Home",
+                        text = stringResource(id = R.string.home),
                         color = W
                     )
                 }
@@ -233,8 +201,8 @@ fun GameView(
                 // Chiudi il dialog senza salvare
                 showDialog.value = false
             },
-            title = { Text("Salvare la partita?") },
-            text = { Text("La partita non è stata completata. Vuoi salvarla prima di uscire?") },
+            title = { Text(stringResource(id = R.string.dialog_save_game_title))},
+            text = { Text(stringResource(id = R.string.dialog_save_game_message)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -249,7 +217,7 @@ fun GameView(
                         showDialog.value = false
                     }
                 ) {
-                    Text("Salva")
+                    Text(stringResource(id = R.string.dialog_save))
                 }
             },
             dismissButton = {
@@ -265,7 +233,7 @@ fun GameView(
                         showDialog.value = false
                     }
                 ) {
-                    Text("No")
+                    Text(stringResource(id = R.string.dialog_no))
                 }
             }
         )
@@ -283,7 +251,6 @@ private fun formatHour(timestamp: Long): String {
 
 @Composable
 fun ButtonGuess(
-    vm: MyViewModel,
     selectedColors: SnapshotStateList<String>,
     onClick: (SnapshotStateList<String>) -> Unit
 ) {
@@ -335,7 +302,7 @@ fun GameArea(
                 ) {
                     if (rowIndex < attempts.size) {
                         for (i in 0 until 5) {
-                            EmptyCircle(attempts[rowIndex].guess.get(i).toString()) {}
+                            EmptyCircle(attempts[rowIndex].guess[i].toString()) {}
                         }
                     } else if (rowIndex == attempts.size) {
                         for (i in 0 until 5)
@@ -372,8 +339,7 @@ fun FeedBack(nrr: Int, nrw: Int) {
             .size(50.dp)
     ) {
         val radius = 5.dp.toPx()
-        val border = 1.dp.toPx()
-        val circle = mutableStateListOf<Color>(W, W, W, W, W)
+        val circle = mutableStateListOf(W, W, W, W, W)
 
         for (i in 0 until nrr)
             circle[i] = Blue5
@@ -455,7 +421,7 @@ fun EmptyCircle(
 ) {
     val colorValue = when (selectedColor) {
         "W" -> W
-        "R" -> R
+        "R" -> Re
         "C" -> C
         "G" -> G
         "Y" -> Y
@@ -482,7 +448,6 @@ fun EmptyCircle(
 @Composable
 fun ColorSelection(
     vm: MyViewModel,
-    selectedColors: MutableList<String>,
     onClick: (String) -> Unit
 ) {
 
@@ -509,7 +474,7 @@ fun ColorButton(
 ) {
     val colorValue = when (color) {
         "W" -> W
-        "R" -> R
+        "R" -> Re
         "C" -> C
         "G" -> G
         "Y" -> Y
@@ -544,7 +509,7 @@ fun ColorButton(
 fun getColorForCode(code: String): Color {
     return when (code) {
         "W" -> W
-        "R" -> R
+        "R" -> Re
         "C" -> C
         "G" -> G
         "Y" -> Y
@@ -555,23 +520,3 @@ fun getColorForCode(code: String): Color {
     }
 }
 
-
-/*@Preview(showBackground = true)
-@Composable
-fun GreetingPreviewGame() {
-    val context = LocalContext.current
-    val db = DBMastermind.getInstance(context)
-    val repository = Repository(db.daoGameHistory())
-    val instantGame = InstantGame(repository)
-    val vm = MyViewModel(instantGame, repository)
-    val navController = rememberNavController()
-
-    MasterMindTheme {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = Background
-        ) {
-            //GameView(vm = vm, navController = navController, callback = callback)
-        }
-    }
-}*/

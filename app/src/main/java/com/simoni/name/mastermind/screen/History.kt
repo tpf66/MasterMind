@@ -3,77 +3,39 @@ package com.simoni.name.mastermind.screen
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import com.simoni.name.mastermind.db.DBMastermind
+import com.simoni.name.mastermind.R
 import com.simoni.name.mastermind.db.Game
-import com.simoni.name.mastermind.db.Repository
-import com.simoni.name.mastermind.model.InstantGame
 import com.simoni.name.mastermind.model.MyViewModel
-import com.simoni.name.mastermind.ui.theme.Background
-import com.simoni.name.mastermind.ui.theme.Blue3
-import com.simoni.name.mastermind.ui.theme.MasterMindTheme
-import com.simoni.name.mastermind.ui.theme.W
+import com.simoni.name.mastermind.model.utils.GameState
+import com.simoni.name.mastermind.ui.theme.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
-
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.runtime.*
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
-import com.simoni.name.mastermind.model.utils.GameState
-import com.simoni.name.mastermind.ui.theme.B
-import com.simoni.name.mastermind.ui.theme.Background2
-import com.simoni.name.mastermind.ui.theme.Background3
-import com.simoni.name.mastermind.ui.theme.C
-import com.simoni.name.mastermind.ui.theme.G
-import com.simoni.name.mastermind.ui.theme.O
-import com.simoni.name.mastermind.ui.theme.P
-import com.simoni.name.mastermind.ui.theme.R
-import com.simoni.name.mastermind.ui.theme.Y
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 
@@ -124,7 +86,7 @@ fun History(vm: MyViewModel, navController: NavHostController) {
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Empty history",
+                            text = stringResource(id = R.string.history_empty),
                             color = W,
                             fontSize = 30.sp,
                             fontWeight = FontWeight.Bold
@@ -139,7 +101,7 @@ fun History(vm: MyViewModel, navController: NavHostController) {
                         state = stateLazy,
 
                         ) {
-                        itemsIndexed(gameHistoryList) { index, it ->
+                        itemsIndexed(gameHistoryList) { _, it ->
 
                             GameHistoryItemRow(
                                 gameHistory = it,
@@ -192,7 +154,7 @@ fun GameHistoryItemRow(
             ) {
                 Row{
                     Text(
-                        text = "Codice segreto: ",
+                        text = stringResource(id = R.string.secret_code),
                         modifier = Modifier.padding(2.dp),
                         fontSize = 12.sp,
                         color = W
@@ -220,35 +182,35 @@ fun GameHistoryItemRow(
                 }
 
                 Text(
-                    text = "Risultato: ${gameHistory.result}",
+                    text = stringResource(id = R.string.game_result) + gameHistory.result,
                     modifier = Modifier.padding(2.dp),
                     fontSize = 12.sp,
                     color = W
                 )
 
                 Text(
-                    text = "DIfficoltà: ${gameHistory.difficulty}",
+                    text = stringResource(id = R.string.difficulty) + gameHistory.difficulty,
                     modifier = Modifier.padding(2.dp),
                     fontSize = 12.sp,
                     color = W
                 )
 
                 Text(
-                    text = "Tentativi: ${gameHistory.numatt}",
+                    text = stringResource(id = R.string.attempts) + gameHistory.numatt,
                     modifier = Modifier.padding(2.dp),
                     fontSize = 12.sp,
                     color = W
                 )
 
                 Text(
-                    text = "Durata Partita: ${formatHour(millis = gameHistory.duration)}",
+                    text = stringResource(id = R.string.game_duration) + formatHour(millis = gameHistory.duration),
                     modifier = Modifier.padding(2.dp),
                     fontSize = 12.sp,
                     color = W
                 )
 
                 Text(
-                    text = "Data Partita: ${formatDate(gameHistory.date)}",
+                    text = stringResource(id = R.string.game_date) + formatDate(gameHistory.date),
                     modifier = Modifier.padding(2.dp),
                     fontSize = 12.sp,
                     color = W
@@ -300,23 +262,22 @@ private fun formatDate(timestamp: Long): String {
     val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
     val calendar = Calendar.getInstance()
     calendar.timeInMillis = timestamp
-    val date = dateFormat.format(calendar.time)
-    return date
+    return dateFormat.format(calendar.time)
 }
 
 
 @Composable
 private fun formatHour(millis: Long): String {
-    val hours = TimeUnit.MILLISECONDS.toHours(millis) % 24;
-    val minutes = TimeUnit.MILLISECONDS.toMinutes(millis) % 60;
-    val seconds = TimeUnit.MILLISECONDS.toSeconds(millis) % 60;
+    val hours = TimeUnit.MILLISECONDS.toHours(millis) % 24
+    val minutes = TimeUnit.MILLISECONDS.toMinutes(millis) % 60
+    val seconds = TimeUnit.MILLISECONDS.toSeconds(millis) % 60
     return String.format("%d:%d:%d", hours, minutes, seconds)
 }
 
 fun colorForCode(code: String): Color {
     return when (code) {
         "W" -> W
-        "R" -> R
+        "R" -> Re
         "C" -> C
         "G" -> G
         "Y" -> Y

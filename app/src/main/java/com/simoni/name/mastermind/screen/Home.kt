@@ -1,49 +1,33 @@
 package com.simoni.name.mastermind.screen
 
-import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.simoni.name.mastermind.R
 import com.simoni.name.mastermind.model.MyViewModel
 import com.simoni.name.mastermind.model.utils.Difficulty
-import com.simoni.name.mastermind.model.utils.GameState
-import com.simoni.name.mastermind.model.utils.MyViewState
-import com.simoni.name.mastermind.ui.theme.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
-import kotlin.math.absoluteValue
+import com.simoni.name.mastermind.ui.theme.Blue3
+import com.simoni.name.mastermind.ui.theme.Green
+import com.simoni.name.mastermind.ui.theme.W
 
 
 @Composable
@@ -58,29 +42,31 @@ fun Home(vm: MyViewModel, navController: NavHostController) {
             ) {
                 Spacer(modifier = Modifier.weight(0.5f))
                 Text(
-                    text = "Mastermind",
+                    text = stringResource(id = R.string.app_name),
                     modifier = Modifier.padding(bottom = 16.dp),
-                    fontSize = 40.sp,
+                    fontSize = 45.sp,
                     color = W,
                     fontWeight = FontWeight.Bold
                 )
 
                 Spacer(modifier = Modifier.weight(0.5f))
-                HomeButton(text = "Easy") {
+                HomeButton(text = stringResource(id = R.string.difficulty_easy)) {
                     navController.navigate("GameView")
                     vm.instantGame.difficulty.value = Difficulty.Easy
                     vm.newGame()
                 }
 
                 Spacer(modifier = Modifier.weight(0.1f))
-                HomeButton(text = "Normal") {
+                HomeButton(text = stringResource(id = R.string.difficulty_normal)) {
                     navController.navigate("GameView")
                     vm.instantGame.difficulty.value = Difficulty.Normal
                     vm.newGame()
                 }
 
                 Spacer(modifier = Modifier.weight(0.2f))
-                HomeButton(text = "Game History", onClick = { navController.navigate("History") })
+                HomeButton(
+                    text = stringResource(id = R.string.game_history),
+                    onClick = { navController.navigate("History") })
 
                 Spacer(modifier = Modifier.weight(0.7f))
             }

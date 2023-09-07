@@ -17,7 +17,7 @@ val Background2 = Color(0xFF383C3B)
 val Background3 = Color(0xFF6A6E6E)
 
 val W = Color(0xFFEDEAE5)
-val R= Color(0xFFE8555F)
+val Re= Color(0xFFE8555F)
 val C= Color(0xFF78B8B5)
 val G= Color(0xFFA9C91E)
 val Y= Color(0xFFF2C744)
