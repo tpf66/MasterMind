@@ -1,8 +1,11 @@
 package com.simoni.name.mastermind.screen
 
+import android.app.Activity
+import android.content.Context
 import android.content.res.Configuration
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.*
@@ -17,6 +20,7 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -24,56 +28,76 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.simoni.name.mastermind.R
 import com.simoni.name.mastermind.model.MyViewModel
+import com.simoni.name.mastermind.BuildConfig
+import com.simoni.name.mastermind.model.OrientationUtils
 import com.simoni.name.mastermind.model.utils.Difficulty
-import com.simoni.name.mastermind.ui.theme.Blue3
-import com.simoni.name.mastermind.ui.theme.Green
+import com.simoni.name.mastermind.ui.theme.Blue1
+import com.simoni.name.mastermind.ui.theme.Blue2
 import com.simoni.name.mastermind.ui.theme.W
 
 
 @Composable
-fun Home(vm: MyViewModel, navController: NavHostController) {
+fun Home(
+    vm: MyViewModel,
+    navController: NavHostController,
+    context: Context
+) {
     val configuration = LocalConfiguration.current
+    OrientationUtils.lockOrientationPortrait(context as Activity);
 
-    when (configuration.orientation) {
-        Configuration.ORIENTATION_PORTRAIT -> {
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.weight(0.5f))
-                Text(
-                    text = stringResource(id = R.string.app_name),
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    fontSize = 45.sp,
-                    color = W,
-                    fontWeight = FontWeight.Bold
-                )
 
-                Spacer(modifier = Modifier.weight(0.5f))
-                HomeButton(text = stringResource(id = R.string.difficulty_easy)) {
-                    navController.navigate("GameView")
-                    vm.instantGame.difficulty.value = Difficulty.Easy
-                    vm.newGame()
-                }
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.weight(0.5f))
+        Text(
+            text = stringResource(id = R.string.app_name),
+            modifier = Modifier.padding(bottom = 16.dp),
+            fontSize = 45.sp,
+            color = W,
+            fontWeight = FontWeight.Bold
+        )
 
-                Spacer(modifier = Modifier.weight(0.1f))
-                HomeButton(text = stringResource(id = R.string.difficulty_normal)) {
-                    navController.navigate("GameView")
-                    vm.instantGame.difficulty.value = Difficulty.Normal
-                    vm.newGame()
-                }
+        //Spacer(modifier = Modifier.weight(0.1f))
 
-                Spacer(modifier = Modifier.weight(0.2f))
-                HomeButton(
-                    text = stringResource(id = R.string.game_history),
-                    onClick = { navController.navigate("History") })
+        Image(
+            painter = painterResource(id = R.drawable.ic_launcher_foreground),
+            contentDescription = null,
+            modifier = Modifier
+                .size(300.dp) // Regola la dimensione dell'immagine secondo le tue esigenze
+                .align(Alignment.CenterHorizontally)
+        )
 
-                Spacer(modifier = Modifier.weight(0.7f))
-            }
+        //Spacer(modifier = Modifier.weight(0.2f))
+        HomeButton(text = stringResource(id = R.string.difficulty_easy)) {
+            navController.navigate("GameView")
+            vm.instantGame.difficulty.value = Difficulty.Easy
+            vm.newGame()
         }
 
-        else -> {
+        Spacer(modifier = Modifier.weight(0.1f))
+        HomeButton(text = stringResource(id = R.string.difficulty_normal)) {
+            navController.navigate("GameView")
+            vm.instantGame.difficulty.value = Difficulty.Normal
+            vm.newGame()
         }
+
+        Spacer(modifier = Modifier.weight(0.5f))
+        HomeButton(
+            text = stringResource(id = R.string.game_history),
+            onClick = { navController.navigate("History") })
+
+        Spacer(modifier = Modifier.weight(0.7f))
+
+        Text(
+            text = stringResource(id = R.string.version) + BuildConfig.VERSION_NAME,
+            modifier = Modifier
+                .padding(16.dp)
+                .align(Alignment.End),
+            color = W,
+            fontSize = 10.sp,
+        )
     }
 }
 
@@ -85,9 +109,9 @@ fun HomeButton(
 ) {
     Button(
         onClick = onClick,
-        colors = ButtonDefaults.buttonColors(Blue3),
+        colors = ButtonDefaults.buttonColors(Blue2),
         shape = RoundedCornerShape(15.dp),
-        border = BorderStroke(3.dp, Green),
+        border = BorderStroke(3.dp, Blue1),
         elevation = ButtonDefaults.elevatedButtonElevation(
             defaultElevation = 10.dp,
             pressedElevation = 15.dp,

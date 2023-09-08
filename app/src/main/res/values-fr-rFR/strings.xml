@@ -20,4 +20,6 @@
     <string name="game_result">"Résultat: "</string>
     <string name="game_duration">"Durée: "</string>
     <string name="game_date">"Date: "</string>
+    <string name="version">"Versione: "</string>
+    <string name="toast_delete">Jeu supprimé!</string>
 </resources>

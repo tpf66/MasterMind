@@ -16,6 +16,9 @@ val Background = Color(0xFF464B4A)
 val Background2 = Color(0xFF383C3B)
 val Background3 = Color(0xFF6A6E6E)
 
+val Black = Color.Black
+val Transparent = Color.Transparent
+
 val W = Color(0xFFEDEAE5)
 val Re= Color(0xFFE8555F)
 val C= Color(0xFF78B8B5)

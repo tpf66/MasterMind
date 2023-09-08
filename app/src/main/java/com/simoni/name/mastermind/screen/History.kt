@@ -1,7 +1,11 @@
 package com.simoni.name.mastermind.screen
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Context
 import android.content.res.Configuration
+import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,6 +32,7 @@ import androidx.navigation.NavHostController
 import com.simoni.name.mastermind.R
 import com.simoni.name.mastermind.db.Game
 import com.simoni.name.mastermind.model.MyViewModel
+import com.simoni.name.mastermind.model.OrientationUtils
 import com.simoni.name.mastermind.model.utils.GameState
 import com.simoni.name.mastermind.ui.theme.*
 import kotlinx.coroutines.CoroutineScope
@@ -41,21 +46,21 @@ import java.util.concurrent.TimeUnit
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun History(vm: MyViewModel, navController: NavHostController) {
+fun History(vm: MyViewModel, navController: NavHostController, context: Context) {
     val configuration = LocalConfiguration.current
+    OrientationUtils.unlockOrientation(context as Activity);
+    var gameHistoryList by remember { mutableStateOf<List<Game>>(emptyList()) }
+    val stateLazy = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        gameHistoryList = withContext(Dispatchers.IO) {
+            vm.getAllGameHistory()
+        }
+    }
 
     when (configuration.orientation) {
         Configuration.ORIENTATION_PORTRAIT -> {
-            var gameHistoryList by remember { mutableStateOf<List<Game>>(emptyList()) }
-            val stateLazy = rememberLazyListState()
-            val coroutineScope = rememberCoroutineScope()
-
-            LaunchedEffect(Unit) {
-                gameHistoryList = withContext(Dispatchers.IO) {
-                    vm.getAllGameHistory()
-                }
-            }
-
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Top,
@@ -67,10 +72,18 @@ fun History(vm: MyViewModel, navController: NavHostController) {
                     horizontalArrangement = Arrangement.Start
                 ) {
                     Button(
-                        modifier = Modifier.padding(16.dp),
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .bounceClickEffect(),
                         onClick = { navController.navigate("Home") },
                         colors = ButtonDefaults.buttonColors(Blue3),
-                        shape = RoundedCornerShape(15.dp)
+                        shape = RoundedCornerShape(15.dp),
+                        border = BorderStroke(3.dp, Green),
+                        elevation = ButtonDefaults.elevatedButtonElevation(
+                            defaultElevation = 10.dp,
+                            pressedElevation = 15.dp,
+                            disabledElevation = 0.dp
+                        )
                     ) {
                         Icon(
                             imageVector = Icons.Default.Home,
@@ -98,20 +111,17 @@ fun History(vm: MyViewModel, navController: NavHostController) {
                     LazyColumn(
                         reverseLayout = true,
                         userScrollEnabled = true,
-                        state = stateLazy,
-
+                        state = stateLazy
                         ) {
                         itemsIndexed(gameHistoryList) { _, it ->
 
-                            GameHistoryItemRow(
-                                gameHistory = it,
-                                vm,
-                                navController
-                            ) { gameToDelete ->
+                            GameHistoryItemRow(it, vm, navController)
+                            { gameToDelete ->
                                 CoroutineScope(Dispatchers.IO).launch {
                                     vm.deleteSelectedGames(gameToDelete)
                                     gameHistoryList = vm.getAllGameHistory()
                                 }
+                                Toast.makeText(context, R.string.toast_delete , Toast.LENGTH_SHORT).show()
                             }
                         }
                     }
@@ -120,10 +130,75 @@ fun History(vm: MyViewModel, navController: NavHostController) {
         }
 
         else -> {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    Button(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .bounceClickEffect(),
+                        onClick = { navController.navigate("Home") },
+                        colors = ButtonDefaults.buttonColors(Blue3),
+                        shape = RoundedCornerShape(15.dp),
+                        border = BorderStroke(3.dp, Green),
+                        elevation = ButtonDefaults.elevatedButtonElevation(
+                            defaultElevation = 10.dp,
+                            pressedElevation = 15.dp,
+                            disabledElevation = 0.dp
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Home,
+                            contentDescription = null,
+                            tint = W
+                        )
+                    }
+                }
+
+                if (gameHistoryList.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.history_empty),
+                            color = W,
+                            fontSize = 30.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                } else {
+                    coroutineScope.launch { stateLazy.animateScrollToItem(gameHistoryList.size) }
+
+                    LazyColumn(
+                        reverseLayout = true,
+                        userScrollEnabled = true,
+                        state = stateLazy
+                    ) {
+                        itemsIndexed(gameHistoryList) { _, it ->
+
+                            GameHistoryItemRow(it, vm, navController)
+                            { gameToDelete ->
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    vm.deleteSelectedGames(gameToDelete)
+                                    gameHistoryList = vm.getAllGameHistory()
+                                }
+                                Toast.makeText(context, R.string.toast_delete , Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
-
 
 @Composable
 fun GameHistoryItemRow(
@@ -172,7 +247,7 @@ fun GameHistoryItemRow(
                                     radius = size.minDimension / 2
                                 )
                                 drawCircle(
-                                    color = Color.Black,
+                                    color = Black,
                                     radius = size.minDimension / 2,
                                     style = Stroke(width = 2.dp.toPx())
                                 )
@@ -222,10 +297,18 @@ fun GameHistoryItemRow(
                 verticalArrangement = Arrangement.SpaceAround
             ) {
                 Button(
-                    modifier = Modifier.padding(5.dp),
+                    modifier = Modifier
+                        .padding(5.dp)
+                        .bounceClickEffect(),
                     onClick = { onClick(gameHistory) },
                     colors = ButtonDefaults.buttonColors(Blue3),
-                    shape = RoundedCornerShape(15.dp)
+                    shape = RoundedCornerShape(15.dp),
+                    border = BorderStroke(3.dp, Green),
+                    elevation = ButtonDefaults.elevatedButtonElevation(
+                        defaultElevation = 10.dp,
+                        pressedElevation = 15.dp,
+                        disabledElevation = 0.dp
+                    )
                 ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
@@ -235,7 +318,9 @@ fun GameHistoryItemRow(
                 }
                 if (gameHistory.result == GameState.Ongoing.toString()) {
                     Button(
-                        modifier = Modifier.padding(5.dp),
+                        modifier = Modifier
+                            .padding(5.dp)
+                            .bounceClickEffect(),
                         onClick = {
                             vm.loadGame(gameHistory)
 
@@ -243,7 +328,13 @@ fun GameHistoryItemRow(
                             navController.navigate("GameView")
                         },
                         colors = ButtonDefaults.buttonColors(Blue3),
-                        shape = RoundedCornerShape(15.dp)
+                        shape = RoundedCornerShape(15.dp),
+                        border = BorderStroke(3.dp, Green),
+                        elevation = ButtonDefaults.elevatedButtonElevation(
+                            defaultElevation = 10.dp,
+                            pressedElevation = 15.dp,
+                            disabledElevation = 0.dp
+                        )
                     ) {
                         Icon(
                             imageVector = Icons.Default.PlayArrow,

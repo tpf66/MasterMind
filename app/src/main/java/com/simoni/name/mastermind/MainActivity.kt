@@ -49,9 +49,9 @@ class MainActivity : ComponentActivity() {
                     color = Background
                 ) {
                     NavHost(navController = navController, startDestination = "Home") {
-                        composable("Home") { Home(vm, navController) }
-                        composable("History") { History(vm, navController) }
-                        composable("GameView") { GameView(vm, navController, dispatcher, callback, showDialog) }
+                        composable("Home") { Home(vm, navController, context) }
+                        composable("History") { History(vm, navController, context) }
+                        composable("GameView") { GameView(vm, navController, dispatcher, callback, showDialog, context) }
                     }
                 }
             }
