@@ -46,15 +46,20 @@ import java.util.concurrent.TimeUnit
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun History(vm: MyViewModel, navController: NavHostController, context: Context) {
+fun History(
+    vm: MyViewModel,
+    navController: NavHostController,
+    context: Context,
+    gameHistoryList: MutableState<List<Game>>
+) {
     val configuration = LocalConfiguration.current
-    OrientationUtils.unlockOrientation(context as Activity);
-    var gameHistoryList by remember { mutableStateOf<List<Game>>(emptyList()) }
+    OrientationUtils.unlockOrientation(context as Activity)
+
     val stateLazy = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-        gameHistoryList = withContext(Dispatchers.IO) {
+        gameHistoryList.value = withContext(Dispatchers.IO) {
             vm.getAllGameHistory()
         }
     }
@@ -93,7 +98,7 @@ fun History(vm: MyViewModel, navController: NavHostController, context: Context)
                     }
                 }
 
-                if (gameHistoryList.isEmpty()) {
+                if (gameHistoryList.value.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
@@ -106,20 +111,20 @@ fun History(vm: MyViewModel, navController: NavHostController, context: Context)
                         )
                     }
                 } else {
-                    coroutineScope.launch { stateLazy.animateScrollToItem(gameHistoryList.size) }
+                    coroutineScope.launch { stateLazy.animateScrollToItem(gameHistoryList.value.size) }
 
                     LazyColumn(
                         reverseLayout = true,
                         userScrollEnabled = true,
                         state = stateLazy
                         ) {
-                        itemsIndexed(gameHistoryList) { _, it ->
+                        itemsIndexed(gameHistoryList.value) { _, it ->
 
                             GameHistoryItemRow(it, vm, navController)
                             { gameToDelete ->
                                 CoroutineScope(Dispatchers.IO).launch {
                                     vm.deleteSelectedGames(gameToDelete)
-                                    gameHistoryList = vm.getAllGameHistory()
+                                    gameHistoryList.value = vm.getAllGameHistory()
                                 }
                                 Toast.makeText(context, R.string.toast_delete , Toast.LENGTH_SHORT).show()
                             }
@@ -162,7 +167,7 @@ fun History(vm: MyViewModel, navController: NavHostController, context: Context)
                     }
                 }
 
-                if (gameHistoryList.isEmpty()) {
+                if (gameHistoryList.value.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
@@ -175,20 +180,20 @@ fun History(vm: MyViewModel, navController: NavHostController, context: Context)
                         )
                     }
                 } else {
-                    coroutineScope.launch { stateLazy.animateScrollToItem(gameHistoryList.size) }
+                    coroutineScope.launch { stateLazy.animateScrollToItem(gameHistoryList.value.size) }
 
                     LazyColumn(
                         reverseLayout = true,
                         userScrollEnabled = true,
                         state = stateLazy
                     ) {
-                        itemsIndexed(gameHistoryList) { _, it ->
+                        itemsIndexed(gameHistoryList.value) { _, it ->
 
                             GameHistoryItemRow(it, vm, navController)
                             { gameToDelete ->
                                 CoroutineScope(Dispatchers.IO).launch {
                                     vm.deleteSelectedGames(gameToDelete)
-                                    gameHistoryList = vm.getAllGameHistory()
+                                    gameHistoryList.value = vm.getAllGameHistory()
                                 }
                                 Toast.makeText(context, R.string.toast_delete , Toast.LENGTH_SHORT).show()
                             }

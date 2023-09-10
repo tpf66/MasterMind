@@ -22,4 +22,5 @@
     <string name="game_date">Date: </string>
     <string name="version">Version:</string>
     <string name="toast_delete">Game deleted!</string>
+    <string name="how_to_play_instruction" translatable="false">Benvenuto in MasterMind! \nIn questo gioco, hai due modalità di difficoltà tra cui scegliere: Facile e Normale. \nModalità Facile: In questa modalità, la sequenza segreta è composta da 5 colori diversi senza ripetizioni. \nModalità Normale: In questa modalità, la sequenza segreta è composta da 5 colori, ed sono possibili alcune ripetizioni. \nIl tuo obiettivo è indovinare la sequenza segreta nel minor numero di tentativi possibile. \nOgni volta che fai un tentativo, riceverai un feedback sui colori che sono corretti nella posizione giusta (blu chiaro) e i colori che sono corretti ma nella posizione sbagliata (blu scuro). \nVinci il gioco indovinando la sequenza segreta prima di esaurire le vite. \nBuona fortuna e divertiti a giocare a MasterMind!</string>
 </resources>

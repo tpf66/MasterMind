@@ -22,6 +22,8 @@ import com.simoni.name.mastermind.ui.theme.MasterMindTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import com.simoni.name.mastermind.db.Game
 
 
 class MainActivity : ComponentActivity() {
@@ -37,6 +39,7 @@ class MainActivity : ComponentActivity() {
                 val vm by remember { mutableStateOf(MyViewModel(instantGame, repository)) }
                 val navController = rememberNavController()
                 val showDialog = remember { mutableStateOf(false) }
+                val gameHistoryList = rememberSaveable { mutableStateOf<List<Game>>(emptyList()) }
                 val dispatcher = LocalOnBackPressedDispatcherOwner.current
                 val callback = object : OnBackPressedCallback(true){
                     override fun handleOnBackPressed() {
@@ -50,7 +53,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     NavHost(navController = navController, startDestination = "Home") {
                         composable("Home") { Home(vm, navController, context) }
-                        composable("History") { History(vm, navController, context) }
+                        composable("History") { History(vm, navController, context, gameHistoryList) }
                         composable("GameView") { GameView(vm, navController, dispatcher, callback, showDialog, context) }
                     }
                 }
