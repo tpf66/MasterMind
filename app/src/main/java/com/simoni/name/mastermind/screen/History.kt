@@ -328,9 +328,10 @@ fun GameHistoryItemRow(
                             .bounceClickEffect(),
                         onClick = {
                             vm.loadGame(gameHistory)
-
-                            onClick(gameHistory)
                             navController.navigate("GameView")
+                            CoroutineScope(Dispatchers.IO).launch {
+                                vm.deleteSelectedGames(gameHistory)
+                            }
                         },
                         colors = ButtonDefaults.buttonColors(Blue3),
                         shape = RoundedCornerShape(15.dp),

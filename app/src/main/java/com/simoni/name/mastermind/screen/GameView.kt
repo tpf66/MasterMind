@@ -25,9 +25,9 @@ import com.simoni.name.mastermind.screen.gameobject.ButtonGuess
 import com.simoni.name.mastermind.screen.gameobject.ColorSelection
 import com.simoni.name.mastermind.screen.gameobject.EmptyCircle
 import com.simoni.name.mastermind.screen.gameobject.FeedBack
-import com.simoni.name.mastermind.screen.gameobject.dialog
+import com.simoni.name.mastermind.screen.gameobject.Dialog
 import com.simoni.name.mastermind.screen.gameobject.formatHour
-import com.simoni.name.mastermind.screen.gameobject.onFinish
+import com.simoni.name.mastermind.screen.gameobject.OnFinish
 import com.simoni.name.mastermind.ui.theme.*
 
 
@@ -132,12 +132,12 @@ fun GameView(
         }
     }
     if (vm.instantGame.isGameFinished.value) {
-        onFinish(vm, navController, clickable)
+        OnFinish(vm, navController, clickable)
     } else {
         clickable.value = true
     }
     if (showDialog.value) {
-        dialog(vm, navController, showDialog)
+        Dialog(vm, navController, showDialog)
     }
 }
 

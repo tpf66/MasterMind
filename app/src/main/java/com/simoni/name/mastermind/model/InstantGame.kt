@@ -29,7 +29,7 @@ class InstantGame(private val repository: Repository) {
     var difficulty = mutableStateOf(Difficulty.Normal)
     var currentId: Long = -1L
     var isGameModified = mutableStateOf(false)
-
+    var loaded = mutableStateOf(false)
 
     init {
         CoroutineScope(Dispatchers.IO).launch {

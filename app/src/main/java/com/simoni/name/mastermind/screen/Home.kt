@@ -29,6 +29,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -53,7 +54,7 @@ fun Home(
     context: Context
 ) {
     OrientationUtils.lockOrientationPortrait(context as Activity)
-    val dialog = remember{ mutableStateOf(false)}
+    val dialog = remember { mutableStateOf(false) }
 
     Column(
         verticalArrangement = Arrangement.Center,
@@ -68,8 +69,8 @@ fun Home(
                 modifier = Modifier
                     .padding(16.dp)
                     .bounceClickEffect(),
-                onClick = { 
-                          dialog.value = true
+                onClick = {
+                    dialog.value = true
                 },
                 colors = ButtonDefaults.buttonColors(Blue3),
                 shape = RoundedCornerShape(15.dp),
@@ -148,20 +149,33 @@ fun Tutorial(dialog: MutableState<Boolean>) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp),
+                .height(250.dp),
             colors = CardDefaults.cardColors(containerColor = W),
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(16.dp)
         ) {
-            Text(
-                text = stringResource(id = R.string.how_to_play_instruction),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .wrapContentSize(Alignment.Center)
-                    .verticalScroll(rememberScrollState())
-                    .padding(10.dp),
-                textAlign = TextAlign.Start,
-                color = Black
-            )
+            Column(
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.Start
+            ) {
+                Text(
+                    text = "Tutorial",
+                    modifier = Modifier.padding(20.dp),
+                    textAlign = TextAlign.Start,
+                    color = Black,
+                    fontSize = 25.sp
+                )
+                Text(
+                    text = stringResource(id = R.string.how_to_play_instruction),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .wrapContentSize(Alignment.Center)
+                        .verticalScroll(rememberScrollState())
+                        .padding(start = 20.dp, end= 20.dp, bottom = 20.dp),
+                    textAlign = TextAlign.Start,
+                    color = Black,
+                    fontSize = 12.sp
+                )
+            }
         }
     }
 }
@@ -193,6 +207,16 @@ fun HomeButton(
         )
     }
 }
+
+
+@Preview(showBackground = true)
+@Composable
+fun GreetingPreview() {
+    val dialog = remember { mutableStateOf(false) }
+
+    Tutorial(dialog = dialog)
+}
+
 
 fun Modifier.bounceClickEffect() = composed {
     var isPressed by remember { mutableStateOf(false) }

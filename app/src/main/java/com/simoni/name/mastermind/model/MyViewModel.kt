@@ -71,6 +71,7 @@ class MyViewModel(inGame: InstantGame, repo: Repository) {
         instantGame.difficulty.value = game.difficulty
         instantGame.currentId = game.id
         instantGame.isGameModified.value = false
+        instantGame.loaded.value = true
     }
 
     suspend fun getAllGameHistory(): List<Game> {

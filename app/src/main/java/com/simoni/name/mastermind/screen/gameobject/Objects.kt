@@ -64,7 +64,7 @@ import java.util.Calendar
 import java.util.Locale
 
 @Composable
-fun onFinish(
+fun OnFinish(
     vm: MyViewModel,
     navController: NavHostController,
     clickable: MutableState<Boolean>
@@ -86,7 +86,9 @@ fun onFinish(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = if (vm.instantGame.status.value == GameState.Win) stringResource(id = R.string.game_result_win) else stringResource(id = R.string.game_result_lose) ,
+                text = if (vm.instantGame.status.value == GameState.Win) stringResource(id = R.string.game_result_win) else stringResource(
+                    id = R.string.game_result_lose
+                ),
                 color = Black,
                 fontWeight = FontWeight.Bold,
                 fontSize = 30.sp,
@@ -143,18 +145,27 @@ fun onFinish(
 
 
 @Composable
-fun dialog(vm: MyViewModel,
-           navController: NavHostController,
-           showDialog: MutableState<Boolean>
-){
+fun Dialog(
+    vm: MyViewModel,
+    navController: NavHostController,
+    showDialog: MutableState<Boolean>
+) {
     AlertDialog(
         onDismissRequest = {
             // Chiudi il dialog senza salvare
             showDialog.value = false
         },
         title = { Text(stringResource(id = R.string.dialog_save_game_title)) },
-        text = { Text(stringResource(id = R.string.dialog_save_game_message)) },
+        text = {
+            Text(
+                if (vm.instantGame.loaded.value) stringResource(id = R.string.dialog_save_game_loaded) else stringResource(
+                    id = R.string.dialog_save_game_message
+                )
+            )
+        },
         containerColor = W,
+        textContentColor = Black,
+        titleContentColor = Black,
         confirmButton = {
             TextButton(
                 onClick = {
@@ -169,7 +180,7 @@ fun dialog(vm: MyViewModel,
                     showDialog.value = false
                 }
             ) {
-                Text(stringResource(id = R.string.dialog_save))
+                Text(stringResource(id = R.string.dialog_save), color = Blue1)
             }
         },
         dismissButton = {
@@ -185,7 +196,7 @@ fun dialog(vm: MyViewModel,
                     showDialog.value = false
                 }
             ) {
-                Text(stringResource(id = R.string.dialog_no))
+                Text(stringResource(id = R.string.dialog_no), color = Blue1)
             }
         }
     )
