@@ -51,9 +51,10 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = Background
                 ) {
+                    // NavHost for the navigation trough the window
                     NavHost(navController = navController, startDestination = "Home") {
-                        composable("Home") { Home(vm, navController, context) }
-                        composable("History") { History(vm, navController, context, gameHistoryList) }
+                        composable("Home") { Home(vm, navController, context, callback) }
+                        composable("History") { History(vm, navController, context, gameHistoryList, callback) }
                         composable("GameView") { GameView(vm, navController, dispatcher, callback, showDialog, context) }
                     }
                 }

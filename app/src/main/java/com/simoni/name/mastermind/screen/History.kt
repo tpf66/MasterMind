@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.res.Configuration
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
@@ -50,14 +51,18 @@ fun History(
     vm: MyViewModel,
     navController: NavHostController,
     context: Context,
-    gameHistoryList: MutableState<List<Game>>
+    gameHistoryList: MutableState<List<Game>>,
+    callback: OnBackPressedCallback
 ) {
     val configuration = LocalConfiguration.current
-    OrientationUtils.unlockOrientation(context as Activity)
-
     val stateLazy = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
+    OrientationUtils.unlockOrientation(context as Activity)
 
+    // diable the backpres function
+    callback.isEnabled = false
+
+    // Load the history from the db
     LaunchedEffect(Unit) {
         gameHistoryList.value = withContext(Dispatchers.IO) {
             vm.getAllGameHistory()
@@ -76,6 +81,7 @@ fun History(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start
                 ) {
+                    // Button home
                     Button(
                         modifier = Modifier
                             .padding(16.dp)
@@ -99,6 +105,7 @@ fun History(
                 }
 
                 if (gameHistoryList.value.isEmpty()) {
+                    // empty history
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
@@ -112,7 +119,6 @@ fun History(
                     }
                 } else {
                     coroutineScope.launch { stateLazy.animateScrollToItem(gameHistoryList.value.size) }
-
                     LazyColumn(
                         reverseLayout = true,
                         userScrollEnabled = true,
@@ -120,6 +126,7 @@ fun History(
                         ) {
                         itemsIndexed(gameHistoryList.value) { _, it ->
 
+                            // lazy column with each game
                             GameHistoryItemRow(it, vm, navController)
                             { gameToDelete ->
                                 CoroutineScope(Dispatchers.IO).launch {
@@ -134,6 +141,7 @@ fun History(
             }
         }
 
+        // same thing with landscape mode
         else -> {
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -205,6 +213,7 @@ fun History(
     }
 }
 
+// Item
 @Composable
 fun GameHistoryItemRow(
     gameHistory: Game,
@@ -232,6 +241,7 @@ fun GameHistoryItemRow(
                     .padding(5.dp),
                 verticalArrangement = Arrangement.SpaceAround
             ) {
+                // Secret code
                 Row{
                     Text(
                         text = stringResource(id = R.string.secret_code),
@@ -240,6 +250,7 @@ fun GameHistoryItemRow(
                         color = W
                     )
 
+                    // i draw the sequence if the game is finished
                     for (color in gameHistory.secretCode) {
                         Canvas(
                             modifier = Modifier
@@ -248,7 +259,7 @@ fun GameHistoryItemRow(
                             onDraw = {
                                 drawCircle(
                                     color = if (gameHistory.result == GameState.Ongoing.toString()) Background2
-                                    else colorForCode(color.toString()), // Funzione per ottenere il colore corrispondente
+                                    else colorForCode(color.toString()), // function to obtain the corresponding color
                                     radius = size.minDimension / 2
                                 )
                                 drawCircle(
@@ -261,6 +272,7 @@ fun GameHistoryItemRow(
                     }
                 }
 
+                // Result game
                 Text(
                     text = stringResource(id = R.string.game_result) + gameHistory.result,
                     modifier = Modifier.padding(2.dp),
@@ -268,6 +280,7 @@ fun GameHistoryItemRow(
                     color = W
                 )
 
+                // Difficulty
                 Text(
                     text = stringResource(id = R.string.difficulty) + gameHistory.difficulty,
                     modifier = Modifier.padding(2.dp),
@@ -275,6 +288,7 @@ fun GameHistoryItemRow(
                     color = W
                 )
 
+                // Attempts
                 Text(
                     text = stringResource(id = R.string.attempts) + gameHistory.numatt,
                     modifier = Modifier.padding(2.dp),
@@ -282,6 +296,7 @@ fun GameHistoryItemRow(
                     color = W
                 )
 
+                // Duration
                 Text(
                     text = stringResource(id = R.string.game_duration) + formatHour(millis = gameHistory.duration),
                     modifier = Modifier.padding(2.dp),
@@ -289,6 +304,7 @@ fun GameHistoryItemRow(
                     color = W
                 )
 
+                // Date
                 Text(
                     text = stringResource(id = R.string.game_date) + formatDate(gameHistory.date),
                     modifier = Modifier.padding(2.dp),
@@ -297,10 +313,12 @@ fun GameHistoryItemRow(
                 )
             }
 
+            // draw the button of the action of the game
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceAround
             ) {
+                // delete button
                 Button(
                     modifier = Modifier
                         .padding(5.dp)
@@ -322,6 +340,7 @@ fun GameHistoryItemRow(
                     )
                 }
                 if (gameHistory.result == GameState.Ongoing.toString()) {
+                    // play button only if isn't finished
                     Button(
                         modifier = Modifier
                             .padding(5.dp)
@@ -354,6 +373,7 @@ fun GameHistoryItemRow(
     }
 }
 
+// function for visualization
 @Composable
 private fun formatDate(timestamp: Long): String {
     val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())

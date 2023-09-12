@@ -24,4 +24,5 @@
     <string name="toast_delete">Jeu supprimé!</string>
     <string name="how_to_play_instruction">"Bienvenue sur MasterMind! \nDans ce jeu, vous avez le choix entre deux modes de difficulté: Facile et Normal. \nMode Facile: Dans ce mode, la séquence secrète est composée de 5 couleurs différentes sans répétition. \nMode Normal: Dans ce mode, la séquence secrète est composée de 5 couleurs, et certaines répétitions sont possibles. \nVotre objectif est de deviner la séquence secrète en le moins d'essais possible. \nÀ chaque tentative, vous recevrez un retour indiquant quelles couleurs sont correctes dans la bonne position (bleu clair) et quelles couleurs sont correctes mais dans la mauvaise position (bleu foncé). \nGagnez la partie en devinant la séquence secrète avant de manquer de vies. \nBonne chance et amusez-vous en jouant à MasterMind!"</string>
     <string name="dialog_save_game_loaded">Attention! Vous fermez une partie qui a déjà commencé. Enregistrez votre partie pour continuer à jouer plus tard.</string>
+    <string name="tutorial">Tutorial</string>
 </resources>

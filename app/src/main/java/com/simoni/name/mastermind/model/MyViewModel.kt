@@ -23,6 +23,7 @@ class MyViewModel(inGame: InstantGame, repo: Repository) {
         repository = repo
     }
 
+    // create new game
     fun newGame() {
         if (instantGame.status.value != GameState.Ongoing) {
             instantGame.newMatch()
@@ -39,6 +40,7 @@ class MyViewModel(inGame: InstantGame, repo: Repository) {
         }
     }
 
+    // save game on db
     fun saveOnDb (){
         val game = Game(
             id = instantGame.currentId++,
@@ -57,6 +59,7 @@ class MyViewModel(inGame: InstantGame, repo: Repository) {
         }
     }
 
+    // load game from db
     fun loadGame(game: Game) {
         newGame()
 
@@ -74,18 +77,21 @@ class MyViewModel(inGame: InstantGame, repo: Repository) {
         instantGame.loaded.value = true
     }
 
+    // get the history value
     suspend fun getAllGameHistory(): List<Game> {
         return withContext(Dispatchers.IO) {
             repository.readAll()
         }
     }
 
+    // delete a game from db
     suspend fun deleteSelectedGames(game: Game) {
         repository.deleteGameHistory(game)
     }
 }
 
 
+// function to convert the attempt saved on db in Attempt
 fun toAttempt (stratt : String, numatt : Int) : SnapshotStateList<Attempt> {
     val attempts = mutableStateListOf<Attempt>()
     var guess: String
@@ -113,6 +119,7 @@ fun toAttempt (stratt : String, numatt : Int) : SnapshotStateList<Attempt> {
 }
 
 
+// format date
 private fun formatDate(timestamp: Long): String {
     val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
     val calendar = Calendar.getInstance()

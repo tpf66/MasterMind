@@ -3,6 +3,7 @@ package com.simoni.name.mastermind.db
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+// function of the db
 class Repository(private val dao: MastermindDao) {
     suspend fun readAll(): List<Game> {
         return withContext(Dispatchers.IO) {

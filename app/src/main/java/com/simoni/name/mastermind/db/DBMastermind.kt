@@ -5,6 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
+// db class
 @Database(entities = [Game::class], version = 2)
 abstract class DBMastermind : RoomDatabase(){
     abstract fun daoGameHistory() : MastermindDao

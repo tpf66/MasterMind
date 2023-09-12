@@ -41,6 +41,7 @@ fun GameView(
     context: Context
 ) {
     dispatcher?.onBackPressedDispatcher?.addCallback(callback)
+    callback.isEnabled= true
     OrientationUtils.lockOrientationPortrait(context as Activity)
     val selectedColors = remember { mutableStateListOf("X", "X", "X", "X", "X") }
     val clickable = remember { mutableStateOf(true) }
@@ -50,11 +51,13 @@ fun GameView(
             .fillMaxSize()
             .padding(16.dp)
     ) {
+        // button home and duration
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
+            // button home
             Button(
                 onClick = {
                     if (clickable.value) {
@@ -78,8 +81,9 @@ fun GameView(
                     tint = W
                 )
             }
-
             Spacer(modifier = Modifier.weight(0.1f))
+
+            // duration
             Text(
                 text = formatHour(vm.instantGame.duration.longValue),
                 color = W,
@@ -89,17 +93,16 @@ fun GameView(
         }
         Spacer(modifier = Modifier.weight(0.5f))
 
-        // Area di gioco con tentativi
+        // Game area with attempt
         GameArea(vm.instantGame.attempts, selectedColors)
         { i ->
             if (clickable.value) {
                 selectedColors[i] = "X"
             }
         }
-
         Spacer(modifier = Modifier.weight(0.5f))
 
-        // Sezione di selezione dei colori
+        // button with the color selection
         ColorSelection(vm)
         { color ->
             if (selectedColors.contains("X") && clickable.value) {
@@ -117,10 +120,9 @@ fun GameView(
                 }
             }
         }
-
         Spacer(modifier = Modifier.weight(0.2f))
 
-        // Pulsante Submit
+        // Button Submit
         ButtonGuess(selectedColors)
         { selectedColor ->
             if (!selectedColors.contains("X") && clickable.value) {
@@ -131,11 +133,14 @@ fun GameView(
             }
         }
     }
+    // Dialog of end of the game
     if (vm.instantGame.isGameFinished.value) {
         OnFinish(vm, navController, clickable)
     } else {
+        // make sure that you can't push the button while the banner is showed
         clickable.value = true
     }
+    // Dialog of the backpress
     if (showDialog.value) {
         Dialog(vm, navController, showDialog)
     }
@@ -154,7 +159,7 @@ fun GameView(
 
 
 
-
+// game area
 @Composable
 fun GameArea(
     attempts: List<Attempt>,
@@ -166,16 +171,19 @@ fun GameArea(
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
     ) {
+        // print the color for each row
         for (rowIndex in 0 until 10) {
+            // choose the modifier for row
             val myModifier: Modifier = if (rowIndex == attempts.size) {
                 Modifier
                     .fillMaxWidth(0.8f)
                     .padding(2.dp)
                     .border(BorderStroke(2.dp, Blue4), shape = RoundedCornerShape(15.dp))
-            } else
+            } else {
                 Modifier
                     .fillMaxWidth(0.8f)
                     .padding(2.dp)
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -187,6 +195,7 @@ fun GameArea(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // Draw each row
                     if (rowIndex < attempts.size) {
                         for (i in 0 until 5) {
                             EmptyCircle(attempts[rowIndex].guess[i].toString()) {}
@@ -200,7 +209,7 @@ fun GameArea(
                     }
                 }
 
-
+                // draw the game hint
                 Row(
                     modifier = Modifier.fillMaxWidth(1f),
                     horizontalArrangement = Arrangement.SpaceEvenly,

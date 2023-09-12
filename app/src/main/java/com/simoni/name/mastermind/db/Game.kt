@@ -8,12 +8,12 @@ import com.simoni.name.mastermind.model.utils.Difficulty
 data class Game(
     @PrimaryKey(autoGenerate = true)
     val id: Long,
-    val version: String, //Versione app
-    val secretCode: String, //Codice segreto partita
-    val result: String, //Risultato partita
-    val stratt: String, // lista di tentativi
-    val numatt: Int, // # di tentativi
-    val duration: Long, //Tempo impiegato
-    val date: Long, //Data partita
-    var difficulty: Difficulty // modalità
+    val version: String, // App version
+    val secretCode: String, // secret code
+    val result: String, // game result
+    val stratt: String, // list of attempts
+    val numatt: Int, // # of attempts
+    val duration: Long, // duration
+    val date: Long, // date
+    var difficulty: Difficulty // game mode
 )

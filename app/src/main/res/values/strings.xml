@@ -24,4 +24,5 @@
     <string name="toast_delete">Game deleted!</string>
     <string name="dialog_save_game_loaded">Attention! You are closing a game that has already started. Save your game to continue playing later.</string>
     <string name="how_to_play_instruction">Welcome to MasterMind! \nIn this game, you have two difficulty modes to choose from: Easy and Normal. \nEasy Mode: In this mode, the secret sequence is made up of 5 different colors without repetition. \nNormal Mode: In this mode, the secret sequence consists of 5 colors, and some repetitions are possible. \nYour goal is to guess the secret sequence in as few tries as possible. \nEach time you make an attempt, you will receive feedback on which colors are correct in the right position (light blue) and which colors are correct but in the wrong position (dark blue). \nWin the game by guessing the secret sequence before you run out of lives. \nGood luck and have fun playing MasterMind!</string>
+    <string name="tutorial">Tutorial</string>
 </resources>

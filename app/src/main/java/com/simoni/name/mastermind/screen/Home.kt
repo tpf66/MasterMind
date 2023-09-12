@@ -2,6 +2,8 @@ package com.simoni.name.mastermind.screen
 
 import android.app.Activity
 import android.content.Context
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -29,7 +31,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -51,15 +52,21 @@ import com.simoni.name.mastermind.ui.theme.W
 fun Home(
     vm: MyViewModel,
     navController: NavHostController,
-    context: Context
+    context: Context,
+    callback: OnBackPressedCallback
 ) {
     OrientationUtils.lockOrientationPortrait(context as Activity)
+
+    callback.isEnabled = false
+    BackHandler(onBack = { })
+
     val dialog = remember { mutableStateOf(false) }
 
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Button info
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -89,6 +96,8 @@ fun Home(
             }
         }
         Spacer(modifier = Modifier.weight(0.5f))
+
+        // Title
         Text(
             text = stringResource(id = R.string.app_name),
             modifier = Modifier.padding(bottom = 16.dp),
@@ -97,37 +106,38 @@ fun Home(
             fontWeight = FontWeight.Bold
         )
 
-        //Spacer(modifier = Modifier.weight(0.1f))
-
+        // Logo
         Image(
             painter = painterResource(id = R.drawable.ic_launcher_foreground),
             contentDescription = null,
             modifier = Modifier
-                .size(300.dp) // Regola la dimensione dell'immagine secondo le tue esigenze
+                .size(300.dp) // size of image
                 .align(Alignment.CenterHorizontally)
         )
 
-        //Spacer(modifier = Modifier.weight(0.2f))
+        // Button game easy
         HomeButton(text = stringResource(id = R.string.difficulty_easy)) {
             navController.navigate("GameView")
             vm.instantGame.difficulty.value = Difficulty.Easy
             vm.newGame()
         }
-
         Spacer(modifier = Modifier.weight(0.1f))
+
+        // Button game normal
         HomeButton(text = stringResource(id = R.string.difficulty_normal)) {
             navController.navigate("GameView")
             vm.instantGame.difficulty.value = Difficulty.Normal
             vm.newGame()
         }
-
         Spacer(modifier = Modifier.weight(0.5f))
-        HomeButton(
-            text = stringResource(id = R.string.game_history),
-            onClick = { navController.navigate("History") })
 
+        // Botton nagivate to history
+        HomeButton(text = stringResource(id = R.string.game_history)){
+             navController.navigate("History")
+        }
         Spacer(modifier = Modifier.weight(0.7f))
 
+        // App version
         Text(
             text = stringResource(id = R.string.version) + BuildConfig.VERSION_NAME,
             modifier = Modifier
@@ -137,12 +147,14 @@ fun Home(
             fontSize = 10.sp,
         )
     }
+    // Show tutorial dialog
     if (dialog.value) {
         Tutorial(dialog)
     }
 }
 
 
+// Composable function of tutorial
 @Composable
 fun Tutorial(dialog: MutableState<Boolean>) {
     Dialog(onDismissRequest = { dialog.value = false }) {
@@ -157,20 +169,22 @@ fun Tutorial(dialog: MutableState<Boolean>) {
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.Start
             ) {
+                // Title
                 Text(
-                    text = "Tutorial",
+                    text = stringResource(R.string.tutorial),
                     modifier = Modifier.padding(20.dp),
                     textAlign = TextAlign.Start,
                     color = Black,
                     fontSize = 25.sp
                 )
+                // Tutorial
                 Text(
                     text = stringResource(id = R.string.how_to_play_instruction),
                     modifier = Modifier
                         .fillMaxSize()
                         .wrapContentSize(Alignment.Center)
                         .verticalScroll(rememberScrollState())
-                        .padding(start = 20.dp, end= 20.dp, bottom = 20.dp),
+                        .padding(start = 20.dp, end = 20.dp, bottom = 20.dp),
                     textAlign = TextAlign.Start,
                     color = Black,
                     fontSize = 12.sp
@@ -181,6 +195,7 @@ fun Tutorial(dialog: MutableState<Boolean>) {
 }
 
 
+// Button
 @Composable
 fun HomeButton(
     text: String,
@@ -209,15 +224,16 @@ fun HomeButton(
 }
 
 
-@Preview(showBackground = true)
+/*@Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     val dialog = remember { mutableStateOf(false) }
 
     Tutorial(dialog = dialog)
-}
+}*/
 
 
+// Bounce effect of the buttons
 fun Modifier.bounceClickEffect() = composed {
     var isPressed by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(if (isPressed) 0.70f else 1f)

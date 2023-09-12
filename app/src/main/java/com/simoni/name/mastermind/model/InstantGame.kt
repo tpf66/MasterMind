@@ -38,6 +38,7 @@ class InstantGame(private val repository: Repository) {
     }
 
 
+    // generate a new match
     fun newMatch() {
         secret.value = generateRandomSecret()
         attempts.clear() // Resetta la lista di tentativi
@@ -49,6 +50,7 @@ class InstantGame(private val repository: Repository) {
         life.intValue = 10
     }
 
+    // internal function that generate a random secret
     private fun generateRandomSecret(): String {
         return if (difficulty.value == Difficulty.Normal) {
             buildString {
@@ -67,6 +69,7 @@ class InstantGame(private val repository: Repository) {
         }
     }
 
+    // function to format date
     private fun formatDate(timestamp: Long): String {
         val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
         val calendar = Calendar.getInstance()
@@ -74,7 +77,7 @@ class InstantGame(private val repository: Repository) {
         return dateFormat.format(calendar.time)
     }
 
-
+    // function that implement the game attempt
     fun attempt(guess: String) {
         var nrr = 0
         var nrw = 0
@@ -82,14 +85,14 @@ class InstantGame(private val repository: Repository) {
         var newGuess = ""
         val evaluatedChars = mutableListOf<Char>()
 
-        // Numero di cifre giuste al posto giusto
+        // Number of digit right at the right place
         for (i in 0 until secret.value.length) {
             if (secret.value[i] == guess[i]) {
                 nrr++
             }
         }
 
-        // Numero di cifre giuste al posto sbagliato
+        // Number of digit right at the wrong place
         for (i in 0 until secret.value.length) {
             if (secret.value[i] != guess[i]) {
                 newSecret += secret.value[i]
@@ -97,6 +100,7 @@ class InstantGame(private val repository: Repository) {
             }
         }
 
+        // function
         if (newSecret.isNotEmpty()) {
             for (letter in guess) {
                 if (!evaluatedChars.contains(letter)) {
@@ -111,6 +115,7 @@ class InstantGame(private val repository: Repository) {
             }
         }
 
+        // modify the game class
         attempts.add(Attempt(guess, nrr, nrw))
         life.intValue -= 1
         isGameModified.value = true
@@ -124,6 +129,7 @@ class InstantGame(private val repository: Repository) {
         }
     }
 
+    // function that count the occurrence
     private fun countHowMany(letters: String, letter: Char): Int {
         var howMany = 0
         for (element in letters) {

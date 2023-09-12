@@ -63,6 +63,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
+// dialog on game finish
 @Composable
 fun OnFinish(
     vm: MyViewModel,
@@ -74,7 +75,7 @@ fun OnFinish(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Black.copy(alpha = 0.7f)) // Sfondo semitrasparente
+            .background(Black.copy(alpha = 0.7f)) // Background transparent
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -99,6 +100,7 @@ fun OnFinish(
                 modifier = Modifier.padding(bottom = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
+                // print the correct sequence
                 for (color in vm.instantGame.secret.value) {
                     Canvas(
                         modifier = Modifier
@@ -119,7 +121,7 @@ fun OnFinish(
                 }
             }
 
-            // Aggiungi il pulsante "Home"
+            // Home button
             Button(
                 onClick = {
                     navController.navigate("Home")
@@ -152,7 +154,7 @@ fun Dialog(
 ) {
     AlertDialog(
         onDismissRequest = {
-            // Chiudi il dialog senza salvare
+            // close the dialog without saving
             showDialog.value = false
         },
         title = { Text(stringResource(id = R.string.dialog_save_game_title)) },
@@ -169,14 +171,14 @@ fun Dialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    // Chiama la funzione per salvare la partita sul database
+                    // save the game on the db
                     vm.saveOnDb()
                     vm.instantGame.status.value = GameState.Load
 
-                    // Esegui le azioni di navigazione desiderate
+                    // go to the home window
                     navController.navigate("Home")
 
-                    // Chiudi il dialog
+                    // Close the dialog
                     showDialog.value = false
                 }
             ) {
@@ -186,13 +188,13 @@ fun Dialog(
         dismissButton = {
             TextButton(
                 onClick = {
-                    // Esegui le azioni di navigazione desiderate
+                    // go to the home
                     navController.navigate("Home")
 
-                    // non salvare la partita
+                    // do not save the game
                     vm.instantGame.status.value = GameState.Load
 
-                    // Chiudi il dialog senza salvare
+                    // close the dialog
                     showDialog.value = false
                 }
             ) {
@@ -211,7 +213,7 @@ fun formatHour(timestamp: Long): String {
     return hourFormat.format(calendar.time)
 }
 
-
+// Button for guess the color
 @Composable
 fun ButtonGuess(
     selectedColors: SnapshotStateList<String>,
@@ -238,7 +240,7 @@ fun ButtonGuess(
     }
 }
 
-
+// draw the feedback hint with color ball
 @Composable
 fun FeedBack(nrr: Int, nrw: Int) {
     Canvas(
@@ -320,6 +322,7 @@ fun FeedBack(nrr: Int, nrw: Int) {
 
 }
 
+// empty attempt
 @Composable
 fun EmptyCircle(
     selectedColor: String?,
@@ -350,7 +353,7 @@ fun EmptyCircle(
     }
 }
 
-
+// Buttons for selecting the colors
 @Composable
 fun ColorSelection(
     vm: MyViewModel,
@@ -372,7 +375,7 @@ fun ColorSelection(
     }
 }
 
-
+// each ball with color
 @Composable
 fun ColorButton(
     color: String,
