@@ -1,9 +1,12 @@
 package com.simoni.name.mastermind.db
 
+import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.simoni.name.mastermind.model.utils.Difficulty
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 @Entity(tableName = "game_history")
 data class Game(
     @PrimaryKey(autoGenerate = true)
@@ -16,4 +19,4 @@ data class Game(
     val duration: Long, // duration
     val date: Long, // date
     var difficulty: Difficulty // game mode
-)
+) : Parcelable
